@@ -82,9 +82,7 @@ class BcAddonMigrator3Component extends Component {
 	public function migrateTheme($theme) {
 		
 		$this->migrateThemeStructure($theme);
-		$newTheme = Inflector::camelize($theme);
-		
-		$themePath = WWW_ROOT . 'theme' . DS . $newTheme;		
+		$themePath = WWW_ROOT . 'theme' . DS . $theme;
 		$this->migrateHelper($themePath . DS . 'Helper');
 		$this->migrateView($themePath);
 		
