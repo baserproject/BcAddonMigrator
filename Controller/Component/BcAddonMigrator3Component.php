@@ -14,11 +14,13 @@ class BcAddonMigrator3Component extends Component {
  * @var array
  */
 	public $__pluginMessage = array(
+		'プラグインのフォルダ名はキャメルケースになりました。（bc_addon_migrator → BcAddonMigrator）',
+		'データベースデータテーブル初期化用関数の引数の内容が変わりました。（$this->Plugin->initDb(\'plugin\', \'プラグイン名\');）',
+		'プラグイン設定ファイルの読込関数が変わりました。（Configure::load(\'プラグイン名.設定ファイル名\');）',
 		'Router::connect() など、Routerの設定は、Config/routes.php に移動してください。自動的に読み込まれます。',
 		'Modelのdelメソッドを利用している場合は、deleteメソッドに書き換えてください。',
 		'プラグインフックは、イベントの仕組みに変更となりましたので適宜書き換えてください。',
 		'クラス内の関数や変数においてアクセス修飾子のないものは public が自動的に付与されますのでマイグレーション後、各メソッドについて見なおしてください。',
-		'クラス内の関数や変数においてアクセス修飾子のないものは public が自動的に付与されますのでマイグレーション後、各メソッドについて見なおしてください。'
 	);
 	
 /**
@@ -27,8 +29,9 @@ class BcAddonMigrator3Component extends Component {
  * @var array
  */
 	public $__themeMessage = array(
+		'テーマのフォルダ名について、CakePHP２系以降キャメルケースとなりましたが、baserCMSではアンダースコア区切りとなりますのでご注意ください。',
 		'PaginatorHelperを利用している場合、第１引数と第２引数を入れ替えてください。',
-		'管理画面のアセットファイルは全て admin フォルダに移動になりましたので参照している場合はURLを書き換えてください。',
+		'管理画面のアセットファイルは全て admin フォルダに移動になりましたので参照している場合はURLを書き換えてください。（/img/ajax-loader.gif → /img/admin/ajax-loader.gif）',
 		'ヘルパの参照方法が変わりました。独自ヘルパを利用されている場合は、次のように書き換えてください。（$uploader → $this->Uploader）',
 		'BcAuthComponent::user() で取得できる配列の階層が変更となりました。モデル名のキーはなくなっています。（$data[\'User\'][\'name\'] → $data[\'name\']）'
 	);
