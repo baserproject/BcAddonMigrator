@@ -154,8 +154,12 @@ class BcAddonMigrator3Component extends Component {
 		$this->log(ob_get_clean(), 'migration');
 		
 		// Mac対策
-		rename($pluginPath . 'config', $pluginPath . 'Config');
-		rename($pluginPath . 'View' . DS . 'elements', $pluginPath . 'View' . DS . 'Elements');
+		if(is_dir($pluginPath . 'config')) {
+			rename($pluginPath . 'config', $pluginPath . 'Config');
+		}
+		if(is_dir($pluginPath . 'View' . DS . 'elements')) {
+			rename($pluginPath . 'View' . DS . 'elements', $pluginPath . 'View' . DS . 'Elements');
+		}
 		if(is_dir($pluginPath . 'controllers' . DS)) {
 			$Folder = new Folder($pluginPath . 'controllers' . DS);
 			$Folder->delete();
