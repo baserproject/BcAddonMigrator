@@ -65,7 +65,7 @@ class BcAddonMigrator3Component extends Component {
 		$this->migratePluginStructure($plugin, $php);
 		
 		$newPlugin = Inflector::camelize($plugin);
-		$pluginPath = APP . 'Plugin' . DS . $plugin . DS;		
+		$pluginPath = APP . 'Plugin' . DS . $newPlugin . DS;		
 		
 		$this->migrateController($pluginPath . 'Controller');
 		$this->migrateComponent($pluginPath . 'Controller' . DS . 'Component');
