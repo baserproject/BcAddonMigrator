@@ -2,7 +2,7 @@
 /**
  * MigrationController
  */
-class MigrationController extends BcPluginAppController {
+class MigrationController extends AppController {
 	
 /**
  * コンポーネント
@@ -15,14 +15,27 @@ class MigrationController extends BcPluginAppController {
  * @var array
  */
 	public $uses = array();
+
+/**
+ * マイグレーター名
+ * 
+ * @var null
+ */
+	public $migrator = null;
 	
 /**
  * beforeFilter
  */
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$migrator = 'BcAddonMigrator' . $this->getMajorVersion();
-		$this->{$migrator} = $this->Components->load('BcAddonMigrator.' . $migrator);
+		$this->migrator = 'BcAddonMigrator' . $this->getMajorVersion();
+		$migratorClass = $this->migrator . 'Component';
+		App::uses($migratorClass, 'BcAddonMigrator.Controller/Component');
+		if(class_exists($migratorClass)) {
+			$this->{$this->migrator} = $this->Components->load('BcAddonMigrator.' . $this->migrator);	
+		} else {
+			$this->setMessage('このプラグインは、このバージョンのbaserCMSに対応していません。', true);
+		}
 	}
 	
 /**
@@ -37,10 +50,9 @@ class MigrationController extends BcPluginAppController {
  */
 	public function admin_plugin() {
 		
-		$migrator = 'BcAddonMigrator' . $this->getMajorVersion();
 		if($this->request->data) {
 			$this->request->data['Migration']['php'] = '/Applications/MAMP/bin/php/php5.4.10/bin/php';
-			$this->{$migrator}->migratePlugin($this->request->data['Migration']['name'], $this->request->data['Migration']['php']);
+			$this->{$this->migrator}->migratePlugin($this->request->data['Migration']['name'], $this->request->data['Migration']['php']);
 			$this->setMessage('プラグイン： ' . $this->request->data['Migration']['name'] . ' のマイグレーションが完了しました。');
 			$this->redirect('plugin');
 		}
@@ -56,7 +68,7 @@ class MigrationController extends BcPluginAppController {
 				}
 			}
 		}
-		$pluginMessage = $this->{$migrator}->getPluginMessage();
+		$pluginMessage = $this->{$this->migrator}->getPluginMessage();
 		$this->set('pluginMessage', $pluginMessage);
 		$this->set('plugins', $plugins);
 		
@@ -66,11 +78,9 @@ class MigrationController extends BcPluginAppController {
  * [ADMIN] テーマのマイグレーション
  */
 	public function admin_theme() {
-		
-		$migrator = 'BcAddonMigrator' . $this->getMajorVersion();
-		
+
 		if($this->request->data) {
-			$this->{$migrator}->migrateTheme($this->request->data['Migration']['name']);
+			$this->{$this->migrator}->migrateTheme($this->request->data['Migration']['name']);
 			$this->setMessage('テーマ： ' . $this->request->data['Migration']['name'] . ' のマイグレーションが完了しました。');
 			$this->redirect('theme');
 		}
@@ -85,7 +95,7 @@ class MigrationController extends BcPluginAppController {
 			}
 		}
 		
-		$themeMessage = $this->{$migrator}->getThemeMessage();
+		$themeMessage = $this->{$this->migrator}->getThemeMessage();
 		$this->set('themeMessage', $themeMessage);
 		$this->set('themes', $themes);
 		
@@ -97,9 +107,7 @@ class MigrationController extends BcPluginAppController {
  * @return string
  */
 	public function getMajorVersion() {
-		
 		return preg_replace('/([0-9])\..+/', "$1", getVersion());
-		
 	}
 	
 }
