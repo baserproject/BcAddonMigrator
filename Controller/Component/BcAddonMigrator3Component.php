@@ -2,12 +2,13 @@
 /**
  * include files
  */
-App::uses('Component', 'Controller');
+App::uses('BcAddonMigratorComponent', 'BcAddonMigrator.Controller/Component');
+App::uses('BcAddonMigratorInterface', 'BcAddonMigrator.Controller/Component');
 
 /**
  * BcAddonMigrator3Component
  */
-class BcAddonMigrator3Component extends Component {
+class BcAddonMigrator3Component extends BcAddonMigratorComponent implements BcAddonMigratorInterface {
 
 /**
  * プラグイン用メッセージ
@@ -35,6 +36,14 @@ class BcAddonMigrator3Component extends Component {
 		'ヘルパの参照方法が変わりました。独自ヘルパを利用されている場合は、次のように書き換えてください。（$uploader → $this->Uploader）',
 		'BcAuthComponent::user() で取得できる配列の階層が変更となりました。モデル名のキーはなくなっています。（$data[\'User\'][\'name\'] → $data[\'name\']）'
 	);
+
+/**
+ * Cake Migrator を利用するかどうか
+ * @return bool
+ */
+	public function useCakeMigrator() {
+		return true;
+	}
 	
 /**
  * プラグイン用メッセージを取得する
@@ -58,11 +67,10 @@ class BcAddonMigrator3Component extends Component {
  * プラグインのマイグレーションを実行
  * 
  * @param string $plugin プラグイン名
- * @param string $php phpの実行ファイルのパス
  */
-	public function migratePlugin($plugin, $php = 'php') {
+	public function migratePlugin($plugin) {
 		
-		$this->migratePluginStructure($plugin, $php);
+		$this->migratePluginStructure($plugin);
 		
 		$newPlugin = Inflector::camelize($plugin);
 		$pluginPath = APP . 'Plugin' . DS . $newPlugin . DS;		
@@ -135,23 +143,11 @@ class BcAddonMigrator3Component extends Component {
  * プラグインの構造変更を実行
  * 
  * @param string $plugin プラグイン名
- * @param string $php phpの実行ファイルのパス
  */
-	public function migratePluginStructure($plugin, $php = 'php') {
-		
-		if(!$php) {
-			$php = 'php';
-		}
+	public function migratePluginStructure($plugin) {
 
-		$cake = ROOT . DS . 'lib' . DS . 'Cake' . DS . 'Console' . DS . 'cake.php';
-		$command = 'upgrade all --plugin';
 		$newPlugin = Inflector::camelize($plugin);
 		$pluginPath = APP . 'Plugin' . DS . $plugin . DS;
-		
-		// CakePHP UpgradeShell 実行
-		ob_start();
-		passthru($php . ' ' . $cake . ' ' . $command . ' ' . $plugin);
-		$this->log(ob_get_clean(), 'migration');
 		
 		// Mac対策
 		if(is_dir($pluginPath . 'config')) {

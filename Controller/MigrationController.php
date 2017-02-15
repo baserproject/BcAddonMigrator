@@ -49,10 +49,13 @@ class MigrationController extends AppController {
  * [ADMIN] プラグインのマイグレーション
  */
 	public function admin_plugin() {
-		
+
+		$useCakeMigrator = $this->{$this->migrator}->useCakeMigrator();
 		if($this->request->data) {
-			$this->request->data['Migration']['php'] = '/Applications/MAMP/bin/php/php5.4.10/bin/php';
-			$this->{$this->migrator}->migratePlugin($this->request->data['Migration']['name'], $this->request->data['Migration']['php']);
+			if($this->{$this->migrator}->useCakeMigrator()) {
+				$this->{$this->migrator}->migratePluginByCake($this->request->data['Migration']['name'], $this->request->data['Migration']['php']);
+			}
+			$this->{$this->migrator}->migratePlugin($this->request->data['Migration']['name']);
 			$this->setMessage('プラグイン： ' . $this->request->data['Migration']['name'] . ' のマイグレーションが完了しました。');
 			$this->redirect('plugin');
 		}
@@ -71,6 +74,7 @@ class MigrationController extends AppController {
 		$pluginMessage = $this->{$this->migrator}->getPluginMessage();
 		$this->set('pluginMessage', $pluginMessage);
 		$this->set('plugins', $plugins);
+		$this->set('useCakeMigrator', $useCakeMigrator);
 		
 	}
 	
