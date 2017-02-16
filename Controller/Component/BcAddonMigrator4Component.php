@@ -64,17 +64,16 @@ class BcAddonMigrator4Component extends BcAddonMigratorComponent implements BcAd
 	public function migratePlugin($plugin, $php = 'php') {
 		
 		$this->migratePluginStructure($plugin, $php);
-		
-		$newPlugin = Inflector::camelize($plugin);
-		$pluginPath = APP . 'Plugin' . DS . $newPlugin . DS;		
+
+		$pluginPath = APP . 'Plugin' . DS . $plugin . DS;
 		
 		$this->migrateController($pluginPath . 'Controller');
 		$this->migrateComponent($pluginPath . 'Controller' . DS . 'Component');
 		$this->migrateModel($pluginPath . 'Model');
 		$this->migrateBehavior($pluginPath . 'Model' . DS . 'Behavior');
-		$this->migratePluginConfig($pluginPath . 'Config', $plugin, $newPlugin);
+		$this->migratePluginConfig($pluginPath . 'Config');
 		$this->migrateHelper($pluginPath . 'View' . DS . 'Helper');
-		$this->migrateView($pluginPath . 'View', $plugin, $newPlugin);
+		$this->migrateView($pluginPath . 'View');
 		
 	}
 	
@@ -159,6 +158,7 @@ class BcAddonMigrator4Component extends BcAddonMigratorComponent implements BcAd
 					$data = $File->read();
 					$data = preg_replace('/extends\s+BcPluginAppModel/', 'extends AppModel', $data);
 					$data = preg_replace('/\'notEmpty\'/', "'notBlank'", $data);
+					$data = preg_replace('/public[\s\t]*?\$useDbConfig[\s\t]*?=[\s\t]*?\'plugin\'[\s\t]*?;/', "", $data);
 					$File->write($data, 'w+', true);
 					$File->close();
 					$this->log('モデルファイル：' . basename($file) . 'を マイグレーションしました。' , 'migration');
@@ -183,8 +183,14 @@ class BcAddonMigrator4Component extends BcAddonMigratorComponent implements BcAd
  * @param string $plugin 古いプラグイン名
  * @param string $newPlugin 新しいプラグイン名
  */
-	public function migratePluginConfig($path, $plugin, $newPlugin) {
-
+	public function migratePluginConfig($path) {
+		$file = $path . DS . 'init.php';
+		$File = new File($file);
+		$data = $File->read();
+		$data = preg_replace('/\$this->Plugin->initDb\(\'plugin\'\,/', '$this->Plugin->initDb(', $data);
+		$File->write($data, 'w+', true);
+		$File->close();
+		$this->log('init.php を マイグレーションしました。' , 'migration');
 	}
 	
 /**
@@ -203,7 +209,7 @@ class BcAddonMigrator4Component extends BcAddonMigratorComponent implements BcAd
  * @param string $plugin 古いプラグイン名
  * @param string $newPlugin 新しいプラグイン名
  */
-	public function migrateView($path, $plugin = null, $newPlugin = null) {
+	public function migrateView($path) {
 		
 	}
 	

@@ -1,7 +1,7 @@
 BcAddonMigrator
 ==========
 baserCMS Add-On Migrator
-Copyright 2008 - 2014, baserCMS Users Community  
+Copyright (c) baserCMS Users Community  
 
 Documentation
 -------------
