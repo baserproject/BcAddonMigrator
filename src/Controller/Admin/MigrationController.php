@@ -1,58 +1,54 @@
 <?php
+
+namespace BcAddonMigrator\Controller\Admin;
+ 
+use BaserCore\Controller\Admin\BcAdminAppController;
+
 /**
  * MigrationController
  */
-class MigrationController extends AppController {
+class MigrationController extends BcAdminAppController
+{
 	
-/**
- * コンポーネント
- * @var array
- */
-	public $components = array('Cookie', 'BcAuth', 'BcAuthConfigure');
-	
-/**
- * モデル
- * @var array
- */
-	public $uses = array();
-
-/**
- * マイグレーター名
- * 
- * @var null
- */
+	/**
+	 * マイグレーター名
+	 *
+	 * @var null
+	 */
 	public $migrator = null;
 	
-/**
- * beforeFilter
- */
-	public function beforeFilter() {
-		parent::beforeFilter();
+	/**
+	 * beforeFilter
+	 */
+	public function beforeFilter(\Cake\Event\EventInterface $event)
+	{
+		parent::beforeFilter($event);
 		$this->migrator = 'BcAddonMigrator' . $this->getMajorVersion();
-		$migratorClass = $this->migrator . 'Component';
-		App::uses($migratorClass, 'BcAddonMigrator.Controller/Component');
-		if(class_exists($migratorClass)) {
-			$this->{$this->migrator} = $this->Components->load('BcAddonMigrator.' . $this->migrator);	
+		$migratorClass = '\\BcAddonMigrator\\Controller\\Component\\' . $this->migrator . 'Component';
+		if (class_exists($migratorClass)) {
+			$this->loadComponent('BcAddonMigrator.' . $this->migrator);
 		} else {
-			$this->setMessage('このプラグインは、このバージョンのbaserCMSに対応していません。', true);
+			$this->BcMessage->setWarning('このプラグインは、このバージョンのbaserCMSに対応していません。');
 		}
 	}
 	
-/**
- * [ADMIN] インデックスページ
- */
-	public function admin_index() {
-		$this->pageTitle = 'baserCMS アドオンマイグレーター';
+	/**
+	 * [ADMIN] インデックスページ
+	 */
+	public function index()
+	{
+		$this->setTitle('baserCMS アドオンマイグレーター');
 	}
 	
-/**
- * [ADMIN] プラグインのマイグレーション
- */
-	public function admin_plugin() {
-
+	/**
+	 * [ADMIN] プラグインのマイグレーション
+	 */
+	public function plugin()
+	{
+		
 		$useCakeMigrator = $this->{$this->migrator}->useCakeMigrator();
-		if($this->request->data) {
-			if($this->{$this->migrator}->useCakeMigrator()) {
+		if ($this->request->data) {
+			if ($this->{$this->migrator}->useCakeMigrator()) {
 				$this->{$this->migrator}->migratePluginByCake($this->request->data['Migration']['name'], $this->request->data['Migration']['php']);
 			}
 			$this->{$this->migrator}->migratePlugin($this->request->data['Migration']['name']);
@@ -61,12 +57,12 @@ class MigrationController extends AppController {
 		}
 		
 		$this->pageTitle = 'baserCMS プラグインマイグレーション';
-		$Folder = new Folder(APP . 'Plugin');
+		$Folder = new \BcAddonMigrator\Controller\Folder(APP . 'Plugin');
 		$files = $Folder->read(true, true, false);
-		$plugins = array();
-		if(!empty($files[0])) {
+		$plugins = [];
+		if (!empty($files[0])) {
 			foreach($files[0] as $file) {
-				if($file != 'BcAddonMigrator') {
+				if ($file != 'BcAddonMigrator') {
 					$plugins[$file] = $file;
 				}
 			}
@@ -78,22 +74,23 @@ class MigrationController extends AppController {
 		
 	}
 	
-/**
- * [ADMIN] テーマのマイグレーション
- */
-	public function admin_theme() {
-
-		if($this->request->data) {
+	/**
+	 * [ADMIN] テーマのマイグレーション
+	 */
+	public function theme()
+	{
+		
+		if ($this->request->data) {
 			$this->{$this->migrator}->migrateTheme($this->request->data['Migration']['name']);
 			$this->setMessage('テーマ： ' . $this->request->data['Migration']['name'] . ' のマイグレーションが完了しました。');
 			$this->redirect('theme');
 		}
 		
 		$this->pageTitle = 'baserCMS テーママイグレーション';
-		$Folder = new Folder(WWW_ROOT . 'theme');
+		$Folder = new \BcAddonMigrator\Controller\Folder(WWW_ROOT . 'theme');
 		$files = $Folder->read(true, true, false);
-		$themes = array();
-		if(!empty($files[0])) {
+		$themes = [];
+		if (!empty($files[0])) {
 			foreach($files[0] as $file) {
 				$themes[$file] = $file;
 			}
@@ -103,15 +100,16 @@ class MigrationController extends AppController {
 		$this->set('themeMessage', $themeMessage);
 		$this->set('themes', $themes);
 		
-	}	
-
-/**
- * baserCMSのメジャーバージョンを取得
- * 
- * @return string
- */
-	public function getMajorVersion() {
-		return preg_replace('/([0-9])\..+/', "$1", getVersion());
+	}
+	
+	/**
+	 * baserCMSのメジャーバージョンを取得
+	 *
+	 * @return string
+	 */
+	public function getMajorVersion()
+	{
+		return preg_replace('/([0-9])\..+/', "$1", \BaserCore\Utility\BcUtil::getVersion());
 	}
 	
 }
