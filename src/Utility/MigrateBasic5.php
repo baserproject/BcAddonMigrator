@@ -27,6 +27,16 @@ class MigrateBasic5
 		$code = preg_replace('/Inflector::/', '\Cake\Utility\Inflector::', $code);
 		$code = preg_replace('/ClassRegistry::init\(/', '\Cake\ORM\TableRegistry::getTableLocator()->get(', $code);
 		$code = preg_replace('/\sgetVersion\(\)/', '\BaserCore\Utility\BcUtil::getVersion()', $code);
+		$code = preg_replace('/\$this->request/', '$this->getRequest()', $code);
+		// 2階層
+		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\']\[\'([^\]]+?)\'\](?!(\s*=))/', "\$this->getRequest()->getData('$1.$2')", $code);
+		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\']\[\'([^\]]+?)\'\]\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withData('$1.$2', $3));", $code);
+		// 1階層
+		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\'](?!(\s*=|\[\'))/', "\$this->getRequest()->getData('$1')", $code);
+		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\']\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withData('$1', $2));", $code);
+		// 0階層
+		$code = preg_replace('/\$this->getRequest\(\)->data(?!(\s*=|\[\'))/', "\$this->getRequest()->getData()", $code);
+		$code = preg_replace('/\$this->getRequest\(\)->data\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withParsedBody($1));", $code);
 		return $code;
 	}
 	
