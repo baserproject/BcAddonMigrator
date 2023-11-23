@@ -147,7 +147,7 @@ return [
 	'author' => '{$author}',
 	'url' => '{$url}',
 	'adminLink' => {$adminLink},
-	'installMessage' => {$installMessage},
+	'installMessage' => '{$installMessage}',
 ];");
 		}
 		$file->close();
