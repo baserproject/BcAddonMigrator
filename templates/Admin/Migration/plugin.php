@@ -11,32 +11,36 @@
 
 /**
  * @var \BaserCore\View\BcAdminAppView $this
+ * @var array $plugins
+ * @var array $pluginMessage
  */
 ?>
 
 
-<div class="panel-box">
-	<h2>マイグレーション実行</h2>
-	<?php echo $this->BcForm->create('Migration') ?>
-	<div class="submit" style="text-align:center">
-	<?php if($useCakeMigrator): ?>
-		<?php echo $this->BcForm->label('Migration.php', 'PHP実行ファイルのパス') ?>
-			<?php echo $this->BcForm->input('Migration.php', array('type' => 'input')) ?><br />
-			<small>プラグインのマイグレーションでは、内部的にコマンドライン版のPHPを実行します。<br />
-				省略した場合は、パスの通っているPHPを実行します。<br />
-				別のPHPを実行する場合は絶対パスで指定してください。（例）/usr/local/lib/php</small><br />
-	<?php endif ?>
-	<?php echo $this->BcForm->input('Migration.name', array('type' => 'select', 'options' => $plugins)) ?>
-	<?php echo $this->BcForm->button('実行', array('class' => 'button')) ?>
+<section class="bca-panel">
+	<div class="bca-panel-box">
+		<h2 class="bca-main__heading" data-bca-heading-size="lg">プラグインマイグレーション実行</h2>
+	  <?php echo $this->BcAdminForm->create() ?>
+		<div class="submit" style="text-align:center">
+		<?php echo $this->BcAdminForm->control('name', ['type' => 'select', 'options' => $plugins]) ?>
+		<?php echo $this->BcAdminForm->button('実行', [
+				'class' => 'bca-btn bca-loading',
+				'data-bca-btn-size' => 'lg',
+				'data-bca-btn-width' => 'lg',
+				'data-bca-btn-type' => 'save',
+		]) ?>
+		</div>
+	  <?php echo $this->BcAdminForm->end() ?>
 	</div>
-	<?php echo $this->BcForm->end() ?>
-</div>
-
-<?php if($pluginMessage): ?>
-<div class="panel-box">
-	<h2>手動で作業が必要な事項</h2>
-	<ul>
-		<li><?php echo implode('</li><li>', $pluginMessage) ?></li>
-	</ul>
-</div>
-<?php endif ?>
+	
+	<?php if ($pluginMessage): ?>
+			<div class="bca-panel-box">
+				<h2 class="bca-main__heading" data-bca-heading-size="lg">手動で作業が必要な事項</h2>
+				<div class="bca-update-log">
+				<ul class="bca-update-log__list">
+					<li class="bca-update-log__list-item"><?php echo implode('</li><li>', $pluginMessage) ?></li>
+				</ul>
+				</div>
+			</div>
+	<?php endif ?>
+</section>

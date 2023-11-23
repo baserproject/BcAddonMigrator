@@ -66,6 +66,7 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 */
 	public function migratePlugin(string $plugin, $php = 'php'): void
 	{
+		return;
 		$this->migratePluginStructure($plugin, $php);
 		
 		$pluginPath = APP . 'Plugin' . DS . $plugin . DS;
@@ -86,6 +87,7 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 */
 	public function migrateTheme(string $theme): void
 	{
+		return;
 		$this->migrateThemeStructure($theme);
 		$themePath = WWW_ROOT . 'theme' . DS . $theme;
 		$this->migrateHelper($themePath . DS . 'Helper');

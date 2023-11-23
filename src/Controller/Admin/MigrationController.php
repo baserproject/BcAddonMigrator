@@ -54,20 +54,15 @@ class MigrationController extends BcAdminAppController
 	 */
 	public function plugin()
 	{
-		
-		$useCakeMigrator = $this->{$this->migrator}->useCakeMigrator();
-		if ($this->request->data) {
-			if ($this->{$this->migrator}->useCakeMigrator()) {
-				$this->{$this->migrator}->migratePluginByCake($this->request->data['Migration']['name'], $this->request->data['Migration']['php']);
-			}
-			$this->{$this->migrator}->migratePlugin($this->request->data['Migration']['name']);
-			$this->setMessage('プラグイン： ' . $this->request->data['Migration']['name'] . ' のマイグレーションが完了しました。');
-			$this->redirect('plugin');
+		if ($this->getRequest()->is('post')) {
+			$this->{$this->migrator}->migratePlugin($this->getRequest()->getData('name'));
+			$this->BcMessage->setInfo('プラグイン： ' . $this->getRequest()->getData('name') . ' のマイグレーションが完了しました。');
+			$this->redirect(['action' => 'plugin']);
 		}
 		
-		$this->pageTitle = 'baserCMS プラグインマイグレーション';
-		$Folder = new \BcAddonMigrator\Controller\Folder(APP . 'Plugin');
-		$files = $Folder->read(true, true, false);
+		$this->setTitle('baserCMS プラグインマイグレーション');
+		$Folder = new \Cake\Filesystem\Folder(BASER_PLUGINS);
+		$files = $Folder->read(true, true);
 		$plugins = [];
 		if (!empty($files[0])) {
 			foreach($files[0] as $file) {
@@ -79,8 +74,6 @@ class MigrationController extends BcAdminAppController
 		$pluginMessage = $this->{$this->migrator}->getPluginMessage();
 		$this->set('pluginMessage', $pluginMessage);
 		$this->set('plugins', $plugins);
-		$this->set('useCakeMigrator', $useCakeMigrator);
-		
 	}
 	
 	/**
@@ -88,16 +81,15 @@ class MigrationController extends BcAdminAppController
 	 */
 	public function theme()
 	{
-		
-		if ($this->request->data) {
-			$this->{$this->migrator}->migrateTheme($this->request->data['Migration']['name']);
-			$this->setMessage('テーマ： ' . $this->request->data['Migration']['name'] . ' のマイグレーションが完了しました。');
-			$this->redirect('theme');
+		if ($this->getRequest()->is('post')) {
+			$this->{$this->migrator}->migrateTheme($this->getRequest()->getData('name'));
+			$this->BcMessage->setInfo('テーマ： ' . $this->getRequest()->getData('name') . ' のマイグレーションが完了しました。');
+			$this->redirect(['action' => 'theme']);
 		}
 		
-		$this->pageTitle = 'baserCMS テーママイグレーション';
-		$Folder = new \BcAddonMigrator\Controller\Folder(WWW_ROOT . 'theme');
-		$files = $Folder->read(true, true, false);
+		$this->setTitle('baserCMS テーママイグレーション');
+		$Folder = new \Cake\Filesystem\Folder(BASER_PLUGINS);
+		$files = $Folder->read(true, true);
 		$themes = [];
 		if (!empty($files[0])) {
 			foreach($files[0] as $file) {
@@ -108,7 +100,6 @@ class MigrationController extends BcAdminAppController
 		$themeMessage = $this->{$this->migrator}->getThemeMessage();
 		$this->set('themeMessage', $themeMessage);
 		$this->set('themes', $themes);
-		
 	}
 	
 	/**

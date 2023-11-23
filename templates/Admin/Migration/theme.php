@@ -11,26 +11,36 @@
 
 /**
  * @var \BaserCore\View\BcAdminAppView $this
+ * @var array $themes
+ * @var array $themeMessage
  */
 ?>
 
 
-<div class="panel-box">
-	<h2>マイグレーション実行</h2>
-	<?php echo $this->BcForm->create('Migration') ?>
-
-	<div class="submit" style="text-align:center">
-		<?php echo $this->BcForm->input('Migration.name', array('type' => 'select', 'options' => $themes)) ?><?php echo $this->BcForm->button('実行', array('class' => 'button')) ?>
+<section class="bca-panel">
+	<div class="bca-panel-box">
+		<h2 class="bca-main__heading" data-bca-heading-size="lg">テーママイグレーション実行</h2>
+	  <?php echo $this->BcAdminForm->create() ?>
+		
+		<div class="submit" style="text-align:center">
+		<?php echo $this->BcAdminForm->control('name', ['type' => 'select', 'options' => $themes]) ?>
+		<?php echo $this->BcAdminForm->button('実行', [
+			'class' => 'bca-btn bca-loading',
+			'data-bca-btn-size' => 'lg',
+			'data-bca-btn-width' => 'lg',
+			'data-bca-btn-type' => 'save',
+		]) ?>
+		</div>
+	  <?php echo $this->BcAdminForm->end() ?>
 	</div>
-
-	<?php echo $this->BcForm->end() ?>
-</div>
-
-<?php if($themeMessage): ?>
-<div class="panel-box">
-	<h2>手動で作業が必要な事項</h2>
-	<ul>
-		<li><?php echo implode('</li><li>', $themeMessage) ?></li>
-	</ul>
-</div>
-<?php endif ?>
+	
+	<?php if ($themeMessage): ?>
+			<div class="bca-panel-box">
+				<h2 class="bca-main__heading" data-bca-heading-size="lg">手動で作業が必要な事項</h2>
+				<div class="bca-update-log">
+					<ul class="bca-update-log__list">
+						<li class="bca-update-log__list-item"><?php echo implode('</li><li>', $themeMessage) ?></li>
+					</ul>
+				</div>
+			</div>
+	<?php endif ?>
