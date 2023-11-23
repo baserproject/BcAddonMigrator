@@ -11,7 +11,14 @@
 
 namespace BcAddonMigrator\Controller\Component;
 
+use BcAddonMigrator\Utility\MigrateBehavior5;
+use BcAddonMigrator\Utility\MigrateComponent5;
+use BcAddonMigrator\Utility\MigrateConfig5;
 use BcAddonMigrator\Utility\MigrateController5;
+use BcAddonMigrator\Utility\MigrateHelper5;
+use BcAddonMigrator\Utility\MigrateTable5;
+use BcAddonMigrator\Utility\MigrateTemplate5;
+use BcAddonMigrator\Utility\MigrateView5;
 use Cake\Controller\Component;
 use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
@@ -73,15 +80,74 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 		$this->makePluginClass($plugin);
 		$this->migrateStructure($plugin);
 		
-		$pluginPath = BASER_PLUGINS . $plugin . DS . 'src' . DS;
+		$pluginPath = BASER_PLUGINS . $plugin . DS;
+		$srcPath = $pluginPath . 'src' . DS;
 		
-		$this->migrateController($plugin, $pluginPath . 'Controller');
-//		$this->migrateComponent($pluginPath . 'Controller' . DS . 'Component');
-//		$this->migrateModel($pluginPath . 'Model');
-//		$this->migrateBehavior($pluginPath . 'Model' . DS . 'Behavior');
-//		$this->migratePluginConfig($pluginPath . 'Config');
-//		$this->migrateHelper($pluginPath . 'View' . DS . 'Helper');
-//		$this->migrateView($pluginPath . 'View');
+		$this->migratePluginConfig($plugin, $pluginPath . 'config.php');
+		$this->migrateConfig($pluginPath . 'config');
+		$this->migrateController($plugin, $srcPath . 'Controller');
+		$this->migrateComponent($srcPath . 'Controller' . DS . 'Component');
+		$this->migrateTable($srcPath . 'Model' . DS . 'Table');
+		$this->migrateBehavior($srcPath . 'Model' . DS . 'Behavior');
+		$this->migrateHelper($srcPath . 'View' . DS . 'Helper');
+		$this->migrateView($srcPath . 'View');
+		
+		$templatePath = BASER_PLUGINS . $plugin . DS . 'templates' . DS;
+		$this->migrateTemplate($templatePath);
+	}
+	
+	/**
+	 * プラグイン設定ファイルのマイグレーションを実行
+	 * @param string $plugin
+	 * @param string $path
+	 * @return void
+	 */
+	public function migratePluginConfig(string $plugin, string $path)
+	{
+		if (!file_exists($path)) {
+			$file = new File($path);
+			$file->write("<?php
+return [
+	'type' => 'Plugin',
+	'title' => '{$plugin}',
+	'description' => '',
+	'author' => '',
+	'url' => '',
+];");
+		} else {
+			$config = include $path;
+			if(is_array($config)) return;
+			if(!isset($title)) $title = $plugin;
+			if(!isset($description)) $description = '';
+			if(!isset($author)) $author = '';
+			if(!isset($url)) $url = '';
+			if(!isset($adminLink)) $adminLink = [];
+			if($adminLink) {
+				if(!empty($adminLink['plugin'])) {
+					$adminLink['plugin'] = \Cake\Utility\Inflector::camelize($adminLink['plugin']);
+				}
+				if(!empty($adminLink['controller'])) {
+					$adminLink['controller'] = \Cake\Utility\Inflector::camelize($adminLink['controller']);
+				}
+				$adminLink = var_export($adminLink, true);
+				$adminLink = str_replace('array (', '[', $adminLink);
+				$adminLink = str_replace(')', ']', $adminLink);
+				$adminLink = str_replace("\n", '', $adminLink);
+			} else {
+				$adminLink = '[]';
+			}
+			$file = new File($path);
+			$file->write("<?php
+return [
+	'type' => 'Plugin',
+	'title' => '{$title}',
+	'description' => '{$description}',
+	'author' => '{$author}',
+	'url' => '{$url}',
+	'adminLink' => {$adminLink}
+];");
+		}
+		$file->close();
 	}
 	
 	/**
@@ -208,22 +274,19 @@ class Plugin extends BcPlugin {}");
 	 */
 	public function migrateController(string $plugin, string $path)
 	{
-		// コントローラー書き換え
 		if (!is_dir($path)) return;
-		$Folder = new Folder($path);
-		$files = $Folder->read(true, true, true);
-		foreach($files[0] as $dir) {
-			$this->migrateController($plugin, $dir);
-		}
+		$files = (new Folder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateController5)->migrate(
-				$plugin, 
-				$this->getSubDir($plugin, $file), 
-				$file
-			);
+			(new MigrateController5)->migrate($plugin, $file);
 		}
 	}
 	
+	/**
+	 * サブフォルダを取得する
+	 * @param $plugin
+	 * @param $path
+	 * @return array|string|string[]|null
+	 */
 	public function getSubDir($plugin, $path)
 	{
 		$path = dirname($path);
@@ -239,32 +302,24 @@ class Plugin extends BcPlugin {}");
 	 */
 	public function migrateComponent($path)
 	{
-		
+		if (!is_dir($path)) return;
+		$files = (new Folder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateComponent5())->migrate($file);
+		}
 	}
 	
 	/**
-	 * モデルファイルのマイグレーションを実行
+	 * テーブルファイルのマイグレーションを実行
 	 *
-	 * @param string $path モデルディレクトリのパス
+	 * @param string $path テーブルディレクトリのパス
 	 */
-	public function migrateModel($path)
+	public function migrateTable($path)
 	{
-		// コントローラー書き換え
-		if (is_dir($path)) {
-			$Folder = new Folder($path);
-			$files = $Folder->read(true, true, true);
-			if (!empty($files[1])) {
-				foreach($files[1] as $file) {
-					$File = new File($file);
-					$data = $File->read();
-					$data = preg_replace('/extends\s+BcPluginAppModel/', 'extends AppModel', $data);
-					$data = preg_replace('/\'notEmpty\'/', "'notBlank'", $data);
-					$data = preg_replace('/public[\s\t]*?\$useDbConfig[\s\t]*?=[\s\t]*?\'plugin\'[\s\t]*?;/', "", $data);
-					$File->write($data, 'w+', true);
-					$File->close();
-					$this->log('モデルファイル：' . basename($file) . 'を マイグレーションしました。', 'migration');
-				}
-			}
+		if (!is_dir($path)) return;
+		$files = (new Folder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateTable5())->migrate($file);
 		}
 	}
 	
@@ -275,7 +330,11 @@ class Plugin extends BcPlugin {}");
 	 */
 	public function migrateBehavior($path)
 	{
-		
+		if (!is_dir($path)) return;
+		$files = (new Folder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateBehavior5())->migrate($file);
+		}
 	}
 	
 	/**
@@ -285,15 +344,17 @@ class Plugin extends BcPlugin {}");
 	 * @param string $plugin 古いプラグイン名
 	 * @param string $newPlugin 新しいプラグイン名
 	 */
-	public function migratePluginConfig($path)
+	public function migrateConfig($path)
 	{
-		$file = $path . DS . 'init.php';
-		$File = new File($file);
-		$data = $File->read();
-		$data = preg_replace('/\$this->Plugin->initDb\(\'plugin\'\,/', '$this->Plugin->initDb(', $data);
-		$File->write($data, 'w+', true);
-		$File->close();
-		$this->log('init.php を マイグレーションしました。', 'migration');
+		if (!is_dir($path)) return;
+		$Folder = new Folder($path);
+		$files = $Folder->read(true, true, true);
+		foreach($files[0] as $dir) {
+			$this->migrateTemplate($dir);
+		}
+		foreach($files[1] as $file) {
+			(new MigrateConfig5())->migrate($file);
+		}	
 	}
 	
 	/**
@@ -303,7 +364,11 @@ class Plugin extends BcPlugin {}");
 	 */
 	public function migrateHelper($path)
 	{
-		
+		if (!is_dir($path)) return;
+		$files = (new Folder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateHelper5())->migrate($file);
+		}
 	}
 	
 	/**
@@ -315,7 +380,29 @@ class Plugin extends BcPlugin {}");
 	 */
 	public function migrateView($path)
 	{
-		
+		if (!is_dir($path)) return;
+		$files = (new Folder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateView5())->migrate($file);
+		}
+	}
+	
+	/**
+	 * テンプレートファイルのマイグレーションを実行
+	 * @param string $path
+	 * @return void
+	 */
+	public function migrateTemplate(string $path)
+	{
+		if (!is_dir($path)) return;
+		$Folder = new Folder($path);
+		$files = $Folder->read(true, true, true);
+		foreach($files[0] as $dir) {
+			$this->migrateTemplate($dir);
+		}
+		foreach($files[1] as $file) {
+			(new MigrateTemplate5())->migrate($file);
+		}	
 	}
 	
 }

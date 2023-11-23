@@ -1,9 +1,17 @@
 <?php
+/**
+ * baserCMS :  Based Website Development Project <https://basercms.net>
+ * Copyright (c) NPO baser foundation <https://baserfoundation.org/>
+ *
+ * @copyright     Copyright (c) NPO baser foundation
+ * @link          https://basercms.net baserCMS Project
+ * @since         5.0.7
+ * @license       https://basercms.net/license/index.html MIT License
+ */
 
 namespace BcAddonMigrator\Utility;
 
 use Cake\Log\LogTrait;
-use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassMethod;
@@ -11,12 +19,25 @@ use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
 use Psr\Log\LogLevel;
 
+/**
+ * Class MigrateController5
+ */
 class MigrateController5
 {
 	
+	/**
+	 * Trait
+	 */
 	use LogTrait;
 	
-	public function migrate($plugin, $prefix, $path)
+	/**
+	 * マイグレーション
+	 * @param string $plugin
+	 * @param string $prefix
+	 * @param string $path
+	 * @return void
+	 */
+	public function migrate(string $plugin, string $path): void
 	{
 		$code = file_get_contents($path);
 		$code = self::addNameSpace($plugin, $path, $code);
@@ -24,9 +45,10 @@ class MigrateController5
 		$code = self::replaceMessage($code);
 		$code = self::replaceComponents($code);
 		$code = self::replaceEtc($code);
-		if (!$prefix) $code = self::replaceAdmin($plugin, $path, $code);
+		$code = MigrateBasic5::replaceCode($code);
+		$code = self::separateAdmin($plugin, $path, $code);
 		file_put_contents($path, $code);
-		$this->log('コントローラーファイル：' . basename($path) . 'を マイグレーションしました。', LogLevel::INFO);
+		$this->log('コントローラー：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
 	}
 	
 	/**
@@ -37,14 +59,8 @@ class MigrateController5
 	public static function replaceEtc($code)
 	{
 		$code = preg_replace('/extends\s+AppController/', 'extends \BaserCore\Controller\BcFrontAppController', $code);
-		$code = preg_replace('/new Folder\(/', 'new \Cake\Filesystem\Folder(', $code);
-		$code = preg_replace('/new File\(/', 'new \Cake\Filesystem\File(', $code);
-		$code = preg_replace('/new BcZip\(/', 'new \BaserCore\Utility\BcZip(', $code);
-		$code = preg_replace('/App::uses\(.+?;\n/', '', $code);
 		$code = preg_replace('/\$this->request->data\)/', '$this->request->getData())', $code);
-		$code = preg_replace('/Configure::/', '\Cake\Core\Configure::', $code);
-		$code = preg_replace('/Inflector::/', '\Cake\Utility\Inflector::', $code);
-		$code = preg_replace('/ClassRegistry::init\(/', '\Cake\ORM\TableRegistry::getTableLocator()->get(', $code);
+		$code = preg_replace('/\$this->pageTitle = (.+?);/', '$this->setTitle($1);', $code);
 		return $code;
 	}
 	
@@ -101,11 +117,17 @@ class MigrateController5
 	public function replaceComponents(string $code)
 	{
 		$code = str_replace('$this->Components->load(', '$this->loadComponent(', $code);
-		$code = preg_replace('/extends Component/', 'extends \Cake\Controller\Component', $code);
 		return $code;
 	}
 	
-	public static function replaceAdmin(string $plugin, string $path, string $code)
+	/**
+	 * 管理画面用のメソッドを分離する
+	 * @param string $plugin
+	 * @param string $path
+	 * @param string $code
+	 * @return string
+	 */
+	public static function separateAdmin(string $plugin, string $path, string $code): string
 	{
 		$adminPath = BASER_PLUGINS . $plugin . DS . 'src' . DS . 'Controller' . DS . 'Admin' . DS;
 		if (!is_dir($adminPath)) {
