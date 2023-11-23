@@ -48,7 +48,7 @@ class MigrateController5
 		$code = MigrateBasic5::replaceCode($code);
 		$code = self::separateAdmin($plugin, $path, $code);
 		file_put_contents($path, $code);
-		$this->log('コントローラー：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
+		$this->log('コントローラー：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
 	
 	/**

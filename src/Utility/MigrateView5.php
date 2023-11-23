@@ -38,7 +38,7 @@ class MigrateView5
 		$code = MigrateBasic5::addNameSpace($plugin, $path, 'View', $code);
 		$code = MigrateBasic5::replaceCode($code);
 		file_put_contents($path, $code);
-		$this->log('ビュー：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
+		$this->log('ビュー：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
 	
 }	

@@ -37,8 +37,9 @@ class MigrateHelper5
 		$code = file_get_contents($path);
 		$code = MigrateBasic5::replaceCode($code);
 		$code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
+		$code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
 		file_put_contents($path, $code);
-		$this->log('ヘルパ：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
+		$this->log('ヘルパ：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
 	
 }	

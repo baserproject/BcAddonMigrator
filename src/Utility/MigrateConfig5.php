@@ -38,7 +38,7 @@ class MigrateConfig5
 		$code = MigrateBasic5::replaceCode($code);
 //		$code = preg_replace('//', '', $code);
 		file_put_contents($path, $code);
-		$this->log('コンフィグ：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
+		$this->log('コンフィグ：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
 	
 }	

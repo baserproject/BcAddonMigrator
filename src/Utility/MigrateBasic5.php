@@ -26,6 +26,11 @@ class MigrateBasic5
 		$code = preg_replace('/Configure::/', '\Cake\Core\Configure::', $code);
 		$code = preg_replace('/Inflector::/', '\Cake\Utility\Inflector::', $code);
 		$code = preg_replace('/ClassRegistry::init\(/', '\Cake\ORM\TableRegistry::getTableLocator()->get(', $code);
+		$code = preg_replace('/getTableLocator\(\)->get\(\'Blog.BlogPost\'\)/', "getTableLocator()->get('BcBlog.BlogPosts')", $code);
+		$code = preg_replace('/getTableLocator\(\)->get\(\'Blog.BlogContent\'\)/', "getTableLocator()->get('BcBlog.BlogContents')", $code);
+		$code = preg_replace('/getTableLocator\(\)->get\(\'Blog.BlogComment\'\)/', "getTableLocator()->get('BcBlog.BlogComments')", $code);
+		$code = preg_replace('/getTableLocator\(\)->get\(\'Blog.BlogCategory\'\)/', "getTableLocator()->get('BcBlog.BlogCategories')", $code);
+		$code = preg_replace('/getTableLocator\(\)->get\(\'Blog.BlogTag\'\)/', "getTableLocator()->get('CuBlog.BlogTags')", $code);
 		$code = preg_replace('/\sgetVersion\(\)/', '\BaserCore\Utility\BcUtil::getVersion()', $code);
 		$code = preg_replace('/\$this->request/', '$this->getRequest()', $code);
 		// 2階層

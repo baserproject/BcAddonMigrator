@@ -36,10 +36,19 @@ class MigrateTemplate5
 	{
 		$code = file_get_contents($path);
 		$code = MigrateBasic5::replaceCode($code);
+		$code = $this->replace($code);
+		file_put_contents($path, $code);
+		$this->log('テンプレート：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+	}
+	
+	public function replace(string $code)
+	{
 		$code = preg_replace('/\$this->BcForm->/', '$this->BcAdminForm->', $code);
 		$code = preg_replace('/\$this->BcAdminForm->input\(/', '$this->BcAdminForm->control(', $code);
-		file_put_contents($path, $code);
-		$this->log('テンプレート：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
+		$code = preg_replace('/\$post\[\'BlogPost\'\]\[\'(.+?)\'\]/', '\$post->$1', $code);
+		$code = preg_replace('/\$post->posts_date/', '\$post->posted', $code);
+		$code = preg_replace('/\$this->BcTime->format\((.+?),\s*(.+?)\)/', '\$this->BcTime->format($2, $1)', $code);
+		return $code;
 	}
 	
 }	

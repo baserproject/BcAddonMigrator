@@ -78,12 +78,12 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	{
 		$plugin = $this->migrateBasicDir($plugin);
 		$this->makePluginClass($plugin);
-		$this->migrateStructure($plugin);
+		$this->migratePluginStructure($plugin);
 		
 		$pluginPath = BASER_PLUGINS . $plugin . DS;
 		$srcPath = $pluginPath . 'src' . DS;
 		
-		$this->migratePluginConfig($plugin, $pluginPath . 'config.php');
+		$this->migrateAddonConfig($plugin, 'Plugin', $pluginPath . 'config.php');
 		$this->migrateConfig($pluginPath . 'config');
 		$this->migrateController($plugin, $srcPath . 'Controller');
 		$this->migrateComponent($plugin, $srcPath . 'Controller' . DS . 'Component');
@@ -99,16 +99,17 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	/**
 	 * プラグイン設定ファイルのマイグレーションを実行
 	 * @param string $plugin
+	 * @param string $type
 	 * @param string $path
 	 * @return void
 	 */
-	public function migratePluginConfig(string $plugin, string $path)
+	public function migrateAddonConfig(string $plugin, string $type, string $path)
 	{
 		if (!file_exists($path)) {
 			$file = new File($path);
 			$file->write("<?php
 return [
-	'type' => 'Plugin',
+	'type' => '{$type}',
 	'title' => '{$plugin}',
 	'description' => '',
 	'author' => '',
@@ -122,6 +123,7 @@ return [
 			if(!isset($author)) $author = '';
 			if(!isset($url)) $url = '';
 			if(!isset($adminLink)) $adminLink = [];
+			if(!isset($installMessage)) $installMessage = '';
 			if($adminLink) {
 				if(!empty($adminLink['plugin'])) {
 					$adminLink['plugin'] = \Cake\Utility\Inflector::camelize($adminLink['plugin']);
@@ -139,12 +141,13 @@ return [
 			$file = new File($path);
 			$file->write("<?php
 return [
-	'type' => 'Plugin',
+	'type' => '{$type}',
 	'title' => '{$title}',
 	'description' => '{$description}',
 	'author' => '{$author}',
 	'url' => '{$url}',
-	'adminLink' => {$adminLink}
+	'adminLink' => {$adminLink},
+	'installMessage' => {$installMessage},
 ];");
 		}
 		$file->close();
@@ -157,13 +160,19 @@ return [
 	 */
 	public function migrateTheme(string $theme): void
 	{
-		return;
 		$theme = $this->migrateBasicDir($theme);
-		$this->makePluginClass($plugin);
-		$this->migrateStructure($theme);
-		$themePath = WWW_ROOT . 'theme' . DS . $theme;
-		$this->migrateHelper($themePath . DS . 'Helper');
-		$this->migrateView($themePath);
+		$this->makePluginClass($theme);
+		$this->migrateThemeStructure($theme);
+		
+		$themePath = BASER_PLUGINS . $theme . DS;
+		$srcPath = $themePath . 'src' . DS;
+		
+		$this->migrateAddonConfig($theme, 'Theme', $themePath . 'config.php');
+		$this->migrateConfig($themePath . 'config');
+		$this->migrateHelper($theme, $srcPath . 'View' . DS . 'Helper');
+		
+		$templatePath = BASER_PLUGINS . $theme . DS . 'templates' . DS;
+		$this->migrateTemplate($templatePath);
 	}
 	
 	/**
@@ -175,7 +184,7 @@ return [
 	{
 		$newName = \Cake\Utility\Inflector::camelize($plugin);
 		if ($plugin !== $newName) {
-			rename(APP . 'Plugin' . DS . $plugin, APP . 'Plugin' . DS . $newName);
+			rename(BASER_PLUGINS . $plugin, BASER_PLUGINS . $newName);
 		}
 		$pluginPath = BASER_PLUGINS . $plugin . DS;
 		if (!is_dir($pluginPath . 'src')) (new \Cake\Filesystem\Folder())->create($pluginPath . 'src');
@@ -207,7 +216,7 @@ class Plugin extends BcPlugin {}");
 	 * @param string $plugin プラグイン名
 	 * @param string $php phpの実行ファイルのパス
 	 */
-	public function migrateStructure(string $plugin)
+	public function migratePluginStructure(string $plugin)
 	{
 		$pluginPath = BASER_PLUGINS . $plugin . DS;
 		
@@ -236,7 +245,7 @@ class Plugin extends BcPlugin {}");
 			}
 		}
 		
-		// templates
+		// move admin
 		if (is_dir($pluginPath . 'templates')) {
 			$files = (new \Cake\Filesystem\Folder($pluginPath . 'templates'))->read();
 			foreach($files[0] as $dir) {
@@ -257,6 +266,69 @@ class Plugin extends BcPlugin {}");
 						$this->moveAdminTemplates($plugin, $dir);
 						break;
 				}
+			}
+		}
+	}
+
+	/**
+	 * テーマの構造変更を実行
+	 *
+	 * @param string $plugin プラグイン名
+	 * @param string $php phpの実行ファイルのパス
+	 */
+	public function migrateThemeStructure(string $plugin)
+	{
+		$pluginPath = BASER_PLUGINS . $plugin . DS;
+		
+		// Config
+		if (is_dir($pluginPath . 'Config')) rename($pluginPath . 'Config', $pluginPath . 'Config');
+		
+		// Helper
+		if (is_dir($pluginPath . 'Helper')) {
+			if(!is_dir($pluginPath . 'src' . DS . 'View')) {
+				(new \Cake\Filesystem\Folder())->create($pluginPath . 'src' . DS . 'View');
+			}
+			rename($pluginPath . 'Helper', $pluginPath . 'src' . DS . 'View' . DS . 'Helper');
+		}
+		
+		if(!is_dir($pluginPath . 'webroot')) {
+			(new \Cake\Filesystem\Folder())->create($pluginPath . 'webroot');
+		}
+		
+		if(!is_dir($pluginPath . 'templates')) {
+			(new \Cake\Filesystem\Folder())->create($pluginPath . 'templates');
+		}
+		
+		// templates
+		$files = (new \Cake\Filesystem\Folder($pluginPath))->read();
+		foreach($files[0] as $dir) {
+			switch($dir) {
+				case 'css':
+				case 'js':
+				case 'img':
+					rename($pluginPath . $dir, $pluginPath . 'webroot' . DS . $dir);
+					break;
+				case 'Elements':
+					rename($pluginPath . $dir, $pluginPath . 'templates' . DS . 'element');
+					$this->moveAdminTemplates($plugin, 'element');
+					break;
+				case 'Layouts':
+					rename($pluginPath . $dir, $pluginPath . 'templates' . DS . 'layout');
+					$this->moveAdminTemplates($plugin, 'layout');
+					break;
+				case 'Emails':
+					rename($pluginPath . $dir, $pluginPath . 'templates' . DS . 'email');
+					$this->moveAdminTemplates($plugin, 'email');
+					break;
+				case 'templates':
+				case 'webroot':
+				case 'config':
+				case 'src':
+					break;	
+				default:
+					rename($pluginPath . $dir, $pluginPath . 'templates' . DS . $dir);
+					$this->moveAdminTemplates($plugin, $dir);
+					break;
 			}
 		}
 	}
