@@ -1,5 +1,5 @@
-baserCMS :  Based Website Development Project <http://basercms.net>
-Copyright (c) baserCMS Users Community <http://sites.google.com/site/baserusers/>
+baserCMS :  Based Website Development Project <httsp://basercms.net>
+Copyright (c) NPO baser foundation <https://baserfoundation.org/>
 
 About License
-http://basercms.net/license/index.html
+https://basercms.net/license/index.html

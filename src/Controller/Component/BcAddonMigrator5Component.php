@@ -1,24 +1,23 @@
 <?php
 /**
- * include files
+ * baserCMS :  Based Website Development Project <https://basercms.net>
+ * Copyright (c) NPO baser foundation <https://baserfoundation.org/>
+ *
+ * @copyright     Copyright (c) NPO baser foundation
+ * @link          https://basercms.net baserCMS Project
+ * @since         5.0.7
+ * @license       https://basercms.net/license/index.html MIT License
  */
 
 namespace BcAddonMigrator\Controller\Component;
 
+use Cake\Controller\Component;
+
 /**
  * BcAddonMigrator4Component
  */
-class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAddonMigratorInterface
+class BcAddonMigrator5Component extends Component implements BcAddonMigratorInterface
 {
-	
-	/**
-	 * Cake Migrator を利用するかどうか
-	 * @return bool
-	 */
-	public function useCakeMigrator()
-	{
-		return false;
-	}
 	
 	/**
 	 * プラグイン用メッセージ
@@ -44,7 +43,7 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 	 *
 	 * @return array
 	 */
-	public function getPluginMessage()
+	public function getPluginMessage(): array
 	{
 		return array_merge($this->__pluginMessage, $this->__themeMessage);
 	}
@@ -54,7 +53,7 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 	 *
 	 * @return array
 	 */
-	public function getThemeMessage()
+	public function getThemeMessage(): array
 	{
 		return $this->__themeMessage;
 	}
@@ -65,9 +64,8 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 	 * @param string $plugin プラグイン名
 	 * @param string $php phpの実行ファイルのパス
 	 */
-	public function migratePlugin($plugin, $php = 'php')
+	public function migratePlugin(string $plugin, $php = 'php'): void
 	{
-		
 		$this->migratePluginStructure($plugin, $php);
 		
 		$pluginPath = APP . 'Plugin' . DS . $plugin . DS;
@@ -79,7 +77,6 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 		$this->migratePluginConfig($pluginPath . 'Config');
 		$this->migrateHelper($pluginPath . 'View' . DS . 'Helper');
 		$this->migrateView($pluginPath . 'View');
-		
 	}
 	
 	/**
@@ -87,14 +84,12 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 	 *
 	 * @param string $theme テーマ名
 	 */
-	public function migrateTheme($theme)
+	public function migrateTheme(string $theme): void
 	{
-		
 		$this->migrateThemeStructure($theme);
 		$themePath = WWW_ROOT . 'theme' . DS . $theme;
 		$this->migrateHelper($themePath . DS . 'Helper');
 		$this->migrateView($themePath);
-		
 	}
 	
 	/**
