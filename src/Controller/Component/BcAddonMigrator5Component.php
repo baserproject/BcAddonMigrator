@@ -11,7 +11,10 @@
 
 namespace BcAddonMigrator\Controller\Component;
 
+use BcAddonMigrator\Utility\MigrateController5;
 use Cake\Controller\Component;
+use Cake\Filesystem\File;
+use Cake\Filesystem\Folder;
 
 /**
  * BcAddonMigrator4Component
@@ -64,20 +67,21 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 * @param string $plugin プラグイン名
 	 * @param string $php phpの実行ファイルのパス
 	 */
-	public function migratePlugin(string $plugin, $php = 'php'): void
+	public function migratePlugin(string $plugin): void
 	{
-		return;
-		$this->migratePluginStructure($plugin, $php);
+		$plugin = $this->migrateBasicDir($plugin);
+		$this->makePluginClass($plugin);
+		$this->migrateStructure($plugin);
 		
-		$pluginPath = APP . 'Plugin' . DS . $plugin . DS;
+		$pluginPath = BASER_PLUGINS . $plugin . DS . 'src' . DS;
 		
-		$this->migrateController($pluginPath . 'Controller');
-		$this->migrateComponent($pluginPath . 'Controller' . DS . 'Component');
-		$this->migrateModel($pluginPath . 'Model');
-		$this->migrateBehavior($pluginPath . 'Model' . DS . 'Behavior');
-		$this->migratePluginConfig($pluginPath . 'Config');
-		$this->migrateHelper($pluginPath . 'View' . DS . 'Helper');
-		$this->migrateView($pluginPath . 'View');
+		$this->migrateController($plugin, $pluginPath . 'Controller');
+//		$this->migrateComponent($pluginPath . 'Controller' . DS . 'Component');
+//		$this->migrateModel($pluginPath . 'Model');
+//		$this->migrateBehavior($pluginPath . 'Model' . DS . 'Behavior');
+//		$this->migratePluginConfig($pluginPath . 'Config');
+//		$this->migrateHelper($pluginPath . 'View' . DS . 'Helper');
+//		$this->migrateView($pluginPath . 'View');
 	}
 	
 	/**
@@ -88,20 +92,47 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	public function migrateTheme(string $theme): void
 	{
 		return;
-		$this->migrateThemeStructure($theme);
+		$theme = $this->migrateBasicDir($theme);
+		$this->makePluginClass($plugin);
+		$this->migrateStructure($theme);
 		$themePath = WWW_ROOT . 'theme' . DS . $theme;
 		$this->migrateHelper($themePath . DS . 'Helper');
 		$this->migrateView($themePath);
 	}
 	
 	/**
-	 * テーマフォルダの構造変更を実行
-	 *
-	 * @param string $theme テーマ名
+	 * アドオンを基本的なフォルダ構成にする
+	 * @param string $plugin
+	 * @return string
 	 */
-	public function migrateThemeStructure($theme)
+	public function migrateBasicDir(string $plugin): string
 	{
-		
+		$newName = \Cake\Utility\Inflector::camelize($plugin);
+		if ($plugin !== $newName) {
+			rename(APP . 'Plugin' . DS . $plugin, APP . 'Plugin' . DS . $newName);
+		}
+		$pluginPath = BASER_PLUGINS . $plugin . DS;
+		if (!is_dir($pluginPath . 'src')) (new \Cake\Filesystem\Folder())->create($pluginPath . 'src');
+		if (is_dir($pluginPath . 'Test')) rename($pluginPath . 'Test', $pluginPath . 'tests');
+		if (is_dir($pluginPath . 'tests' . DS . 'Case')) rename($pluginPath . 'tests' . DS . 'Case', $pluginPath . 'tests' . DS . 'TestCase');
+		return $newName;
+	}
+	
+	/**
+	 * プラグインクラスを作成する
+	 * @param string $plugin
+	 * @return void
+	 */
+	public function makePluginClass(string $plugin)
+	{
+		$srcPath = BASER_PLUGINS . $plugin . DS . 'src';
+		if (file_exists($srcPath . DS . 'Plugin.php')) return;
+		(new \Cake\Filesystem\Folder())->create($srcPath);
+		$file = new \Cake\Filesystem\File($srcPath . DS . 'Plugin.php');
+		$file->write("<?php
+namespace {$plugin};
+use BaserCore\BcPlugin;
+class Plugin extends BcPlugin {}");
 	}
 	
 	/**
@@ -110,9 +141,64 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 * @param string $plugin プラグイン名
 	 * @param string $php phpの実行ファイルのパス
 	 */
-	public function migratePluginStructure($plugin, $php = 'php')
+	public function migrateStructure(string $plugin)
 	{
-		
+		$pluginPath = BASER_PLUGINS . $plugin . DS;
+		if (is_dir($pluginPath . 'Config')) rename($pluginPath . 'Config', $pluginPath . 'Config');
+		if (is_dir($pluginPath . 'View')) rename($pluginPath . 'View', $pluginPath . 'templates');
+		foreach(['Controller', 'Model', 'Event', 'Lib', 'Vendor'] as $dir) {
+			if (is_dir($pluginPath . $dir)) rename($pluginPath . $dir, $pluginPath . 'src' . DS . $dir);
+		}
+		if (is_dir($pluginPath . 'templates')) {
+			$files = (new \Cake\Filesystem\Folder($pluginPath . 'templates'))->read();
+			foreach($files[0] as $dir) {
+				switch($dir) {
+					case 'Elements':
+						rename($pluginPath . 'templates' . DS . $dir, $pluginPath . 'templates' . DS . 'element');
+						$this->moveAdminTemplates($plugin, 'element');
+						break;
+					case 'Layouts':
+						rename($pluginPath . 'templates' . DS . $dir, $pluginPath . 'templates' . DS . 'layout');
+						$this->moveAdminTemplates($plugin, 'layout');
+						break;
+					case 'Emails':
+						rename($pluginPath . 'templates' . DS . $dir, $pluginPath . 'templates' . DS . 'email');
+						$this->moveAdminTemplates($plugin, 'email');
+						break;
+					default:
+						$this->moveAdminTemplates($plugin, $dir);
+						break;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 管理画面用のテンプレートを移動する
+	 * @param string $plugin
+	 * @param string $name
+	 * @return void
+	 */
+	public function moveAdminTemplates(string $plugin, string $name)
+	{
+		$templatesPath = BASER_PLUGINS . $plugin . DS . 'templates' . DS;
+		if (!is_dir($templatesPath . 'Admin')) {
+			(new \Cake\Filesystem\Folder())->create($templatesPath . 'Admin');
+		}
+		$files = (new \Cake\Filesystem\Folder($templatesPath . $name))->read();
+		foreach($files[0] as $dir) {
+			if ($dir !== 'admin') continue;
+			$adminPath = $templatesPath . $name . DS . $dir . DS;
+			$files = (new \Cake\Filesystem\Folder($adminPath))->read();
+			$files = $files[0] + $files[1];
+			foreach($files as $file) {
+				if (!is_dir($templatesPath . 'Admin' . DS . $name)) {
+					(new \Cake\Filesystem\Folder())->create($templatesPath . 'Admin' . DS . $name);
+				}
+				rename($adminPath . $file, $templatesPath . 'Admin' . DS . $name . DS . $file);
+			}
+			(new \Cake\Filesystem\Folder($adminPath))->delete($adminPath);
+		}
 	}
 	
 	/**
@@ -120,23 +206,30 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 *
 	 * @param string $path コントローラーディレクトリへの実行パス
 	 */
-	public function migrateController($path)
+	public function migrateController(string $plugin, string $path)
 	{
 		// コントローラー書き換え
-		if (is_dir($path)) {
-			$Folder = new Folder($path);
-			$files = $Folder->read(true, true, true);
-			if (!empty($files[1])) {
-				foreach($files[1] as $file) {
-					$File = new File($file);
-					$data = $File->read();
-					$data = preg_replace('/extends\s+BcPluginAppController/', 'extends AppController', $data);
-					$File->write($data, 'w+', true);
-					$File->close();
-					$this->log('コントローラーファイル：' . basename($file) . 'を マイグレーションしました。', 'migration');
-				}
-			}
+		if (!is_dir($path)) return;
+		$Folder = new Folder($path);
+		$files = $Folder->read(true, true, true);
+		foreach($files[0] as $dir) {
+			$this->migrateController($plugin, $dir);
 		}
+		foreach($files[1] as $file) {
+			(new MigrateController5)->migrate(
+				$plugin, 
+				$this->getSubDir($plugin, $file), 
+				$file
+			);
+		}
+	}
+	
+	public function getSubDir($plugin, $path)
+	{
+		$path = dirname($path);
+		$subDir = str_replace(BASER_PLUGINS . $plugin . DS . 'src' . DS . 'Controller', '', $path);
+		$subDir = preg_replace('/^\//', '', $subDir);
+		return $subDir;
 	}
 	
 	/**
