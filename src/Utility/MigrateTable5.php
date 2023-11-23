@@ -32,31 +32,38 @@ class MigrateTable5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $path): void
+	public function migrate(string $plugin, string $path): void
 	{
 		$code = file_get_contents($path);
+		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Model' . DS . 'Table', $code);
 		$code = MigrateBasic5::replaceCode($code);
-//		$code = preg_replace('//', '', $code);
+		$code = self::setClassName($path, $code);
+		$code = self::replaceEtc($code);
 		file_put_contents($path, $code);
 		$this->log('テーブル：' . $path . 'を マイグレーションしました。', LogLevel::INFO);
-		
-//		// コントローラー書き換え
-//		if (is_dir($path)) {
-//			$Folder = new Folder($path);
-//			$files = $Folder->read(true, true, true);
-//			if (!empty($files[1])) {
-//				foreach($files[1] as $file) {
-//					$File = new File($file);
-//					$data = $File->read();
-//					$data = preg_replace('/extends\s+BcPluginAppModel/', 'extends AppModel', $data);
-//					$data = preg_replace('/\'notEmpty\'/', "'notBlank'", $data);
-//					$data = preg_replace('/public[\s\t]*?\$useDbConfig[\s\t]*?=[\s\t]*?\'plugin\'[\s\t]*?;/', "", $data);
-//					$File->write($data, 'w+', true);
-//					$File->close();
-//					$this->log('モデルファイル：' . basename($file) . 'を マイグレーションしました。', 'migration');
-//				}
-//			}
-//		}
 	}
 	
+	/**
+	 * クラス名をファイル名に合わせる
+	 * @param string $path
+	 * @param string $code
+	 * @return array|string|string[]|null
+	 */
+	public static function setClassName(string $path, string $code)
+	{
+		$className = basename($path, '.php');
+		$code = preg_replace('/class\s+[a-zA-Z0-9]+\s/', "class $className ", $code);
+		return $code;
+	}
+	
+	/**
+	 * その他の置き換え
+	 * @param $code
+	 * @return array|string|string[]|null
+	 */
+	public static function replaceEtc($code)
+	{
+		$code = preg_replace('/extends\s+AppModel/', 'extends \BaserCore\Model\Table\AppTable', $code);
+		return $code;
+	}
 }	

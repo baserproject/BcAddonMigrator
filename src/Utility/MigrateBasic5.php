@@ -30,4 +30,26 @@ class MigrateBasic5
 		return $code;
 	}
 	
+	/**
+	 * ネームスペースを追加する
+	 * @param string $plugin
+	 * @param string $path
+	 * @param string $code
+	 * @return string
+	 */
+	public static function addNameSpace(string $plugin, string $path, string $layerPath, string $code)
+	{
+		if (preg_match('/namespace/', $code)) return $code;
+		
+		$path = dirname($path);
+		$path = str_replace(BASER_PLUGINS . $plugin . DS . 'src' . DS . $layerPath, '', $path);
+		$nameSpace = $plugin . "\\" . str_replace(DS, "\\", $layerPath);
+		if ($path) {
+			$nameSpace .= "\\" . preg_replace('/^\//', '', $path);
+		}
+		$codeArray = explode("\n", $code);
+		array_splice($codeArray, 1, 0, 'namespace ' . $nameSpace . ';');
+		return implode("\n", $codeArray);
+	}
+	
 }

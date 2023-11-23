@@ -32,9 +32,10 @@ class MigrateBehavior5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $path): void
+	public function migrate(string $plugin, string $path): void
 	{
 		$code = file_get_contents($path);
+		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Model' . DS . 'Behavior', $code);
 		$code = MigrateBasic5::replaceCode($code);
 //		$code = preg_replace('//', '', $code);
 		file_put_contents($path, $code);

@@ -40,7 +40,7 @@ class MigrateController5
 	public function migrate(string $plugin, string $path): void
 	{
 		$code = file_get_contents($path);
-		$code = self::addNameSpace($plugin, $path, $code);
+		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Controller', $code);
 		$code = self::replaceBeforeFilter($code);
 		$code = self::replaceMessage($code);
 		$code = self::replaceComponents($code);
@@ -62,28 +62,6 @@ class MigrateController5
 		$code = preg_replace('/\$this->request->data\)/', '$this->request->getData())', $code);
 		$code = preg_replace('/\$this->pageTitle = (.+?);/', '$this->setTitle($1);', $code);
 		return $code;
-	}
-	
-	/**
-	 * ネームスペースを追加する
-	 * @param string $plugin
-	 * @param string $path
-	 * @param string $code
-	 * @return string
-	 */
-	public static function addNameSpace(string $plugin, string $path, string $code)
-	{
-		if (preg_match('/namespace/', $code)) return $code;
-		
-		$path = dirname($path);
-		$path = str_replace(BASER_PLUGINS . $plugin . DS . 'src' . DS . 'Controller', '', $path);
-		$nameSpace = $plugin . "\\" . 'Controller';
-		if ($path) {
-			$nameSpace .= "\\" . preg_replace('/^\//', '', $path);
-		}
-		$codeArray = explode("\n", $code);
-		array_splice($codeArray, 1, 0, 'namespace ' . $nameSpace . ';');
-		return implode("\n", $codeArray);
 	}
 	
 	/**
