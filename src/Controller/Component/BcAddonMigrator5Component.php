@@ -34,7 +34,7 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 * @var array
 	 */
 	public $__pluginMessage = [
-		'コントローラーにおいて、$this->Session->setFlash() 利用できなくなりました。 $this->Flash->set() または、<br>$this->setMessage(\'メッセージ\', 警告メッセージかどうか：true Or false, DBにログとして保存するかどうか：true Or false, フラッシュメッセージかどうか：true Or false) を利用してください。'
+		''
 	];
 	
 	/**
@@ -43,9 +43,7 @@ class BcAddonMigrator5Component extends Component implements BcAddonMigratorInte
 	 * @var array
 	 */
 	public $__themeMessage = [
-		'ビューにおいて、$this->BcForm->create() の第２引数で、url キーの配列の中以外で action キーは利用できなくなりました。action キーは、url キーの配列の中に指定しなおしてください。（例：$this->BcForm->create(\'ModelName\', [\'url\' => [\'action\' => \'action-name\']]）',
-		'jQuery2系の利用に伴い、チェックボックスの操作において、attr(\'checked\') が利用できなくなりました。prop(\'checked\') を利用してください。',
-		'コントローラーのアクション名が index の場合、コントローラー名だけでアクセスできなくなりました。リンクを設定する場合、末尾にスラッシュを付与したURLに書き換えてください。'
+		'',
 	];
 	
 	/**
