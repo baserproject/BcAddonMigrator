@@ -41,11 +41,11 @@ class MigrateController5
 	{
 		$code = file_get_contents($path);
 		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Controller', $code);
+		$code = MigrateBasic5::replaceCode($code);
 		$code = self::replaceBeforeFilter($code);
 		$code = self::replaceMessage($code);
 		$code = self::replaceComponents($code);
 		$code = self::replaceEtc($code);
-		$code = MigrateBasic5::replaceCode($code);
 		$code = self::separateAdmin($plugin, $path, $code);
 		file_put_contents($path, $code);
 		$this->log('コントローラー：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
@@ -59,8 +59,8 @@ class MigrateController5
 	public static function replaceEtc($code)
 	{
 		$code = preg_replace('/extends\s+AppController/', 'extends \BaserCore\Controller\BcFrontAppController', $code);
-		$code = preg_replace('/\$this->request->data\)/', '$this->request->getData())', $code);
 		$code = preg_replace('/\$this->pageTitle = (.+?);/', '$this->setTitle($1);', $code);
+		$code = preg_replace('/\$this->Session->/', '$this->getRequest()->getSession()->', $code);
 		return $code;
 	}
 	

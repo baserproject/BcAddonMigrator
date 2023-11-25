@@ -75,7 +75,12 @@ class MigrationController extends BcAdminAppController
 				}
 			}
 		}
-		$pluginMessage = $this->{$this->migrator}->getPluginMessage();
+		
+		if(isset($this->{$this->migrator})) {
+			$pluginMessage = $this->{$this->migrator}->getPluginMessage();
+		} else {
+			$pluginMessage = [];
+		}
 		$this->set('pluginMessage', $pluginMessage);
 		$this->set('plugins', $plugins);
 	}
@@ -105,7 +110,11 @@ class MigrationController extends BcAdminAppController
 			}
 		}
 		
-		$themeMessage = $this->{$this->migrator}->getThemeMessage();
+		if(isset($this->{$this->migrator})) {
+			$themeMessage = $this->{$this->migrator}->getThemeMessage();
+		} else {
+			$themeMessage = [];
+		}
 		$this->set('themeMessage', $themeMessage);
 		$this->set('themes', $themes);
 	}
