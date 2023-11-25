@@ -9,10 +9,10 @@
  * @license       https://basercms.net/license/index.html MIT License
  */
 
-namespace BcAddonMigrator\Utility;
+namespace BcAddonMigrator\Controller\Component\ver5;
 
-use Cake\Log\LogTrait;
 use Psr\Log\LogLevel;
+use Cake\Log\LogTrait;
 
 /**
  * Class MigrateTemplate5

@@ -9,15 +9,15 @@
  * @license       https://basercms.net/license/index.html MIT License
  */
 
-namespace BcAddonMigrator\Utility;
+namespace BcAddonMigrator\Controller\Component\ver5;
 
-use Cake\Log\LogTrait;
 use Cake\Filesystem\Folder;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
 use Psr\Log\LogLevel;
+use Cake\Log\LogTrait;
 
 /**
  * Class MigrateController5

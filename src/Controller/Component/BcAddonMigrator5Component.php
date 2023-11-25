@@ -11,17 +11,17 @@
 
 namespace BcAddonMigrator\Controller\Component;
 
-use BcAddonMigrator\Utility\MigrateBehavior5;
-use BcAddonMigrator\Utility\MigrateComponent5;
-use BcAddonMigrator\Utility\MigrateConfig5;
-use BcAddonMigrator\Utility\MigrateController5;
-use BcAddonMigrator\Utility\MigrateHelper5;
-use BcAddonMigrator\Utility\MigrateTable5;
-use BcAddonMigrator\Utility\MigrateTemplate5;
-use BcAddonMigrator\Utility\MigrateView5;
 use Cake\Controller\Component;
 use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
+use BcAddonMigrator\Controller\Component\ver5\MigrateBehavior5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateComponent5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateConfig5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateController5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateHelper5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateTable5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateTemplate5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateView5;
 
 /**
  * BcAddonMigrator4Component

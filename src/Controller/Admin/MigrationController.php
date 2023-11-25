@@ -12,6 +12,8 @@
 namespace BcAddonMigrator\Controller\Admin;
 
 use BaserCore\Controller\Admin\BcAdminAppController;
+use BaserCore\Service\PluginsServiceInterface;
+use Cake\Utility\Hash;
 
 /**
  * MigrationController
@@ -52,7 +54,7 @@ class MigrationController extends BcAdminAppController
 	/**
 	 * [ADMIN] プラグインのマイグレーション
 	 */
-	public function plugin()
+	public function plugin(PluginsServiceInterface $pluginsService)
 	{
 		if ($this->getRequest()->is('post')) {
 			$this->{$this->migrator}->migratePlugin($this->getRequest()->getData('name'));
@@ -66,7 +68,9 @@ class MigrationController extends BcAdminAppController
 		$plugins = [];
 		if (!empty($files[0])) {
 			foreach($files[0] as $file) {
-				if ($file != 'BcAddonMigrator') {
+				if ($file === 'BcAddonMigrator') continue; 
+				$config = include BASER_PLUGINS . $file . DS . 'config.php';
+				if(isset($config['type']) && $config['type'] === 'Plugin') {
 					$plugins[$file] = $file;
 				}
 			}
@@ -93,7 +97,11 @@ class MigrationController extends BcAdminAppController
 		$themes = [];
 		if (!empty($files[0])) {
 			foreach($files[0] as $file) {
-				$themes[$file] = $file;
+				if ($file === 'BcDbMigrator') continue; 
+				$config = include BASER_PLUGINS . $file . DS . 'config.php';
+				if(isset($config['type']) && $config['type'] === 'Theme') {
+					$themes[$file] = $file;
+				}
 			}
 		}
 		

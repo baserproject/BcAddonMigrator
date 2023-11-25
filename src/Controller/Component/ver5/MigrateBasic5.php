@@ -9,7 +9,7 @@
  * @license       https://basercms.net/license/index.html MIT License
  */
 
-namespace BcAddonMigrator\Utility;
+namespace BcAddonMigrator\Controller\Component\ver5;
 
 /**
  * Class MigrateBasic5

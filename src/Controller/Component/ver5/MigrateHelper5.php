@@ -9,15 +9,15 @@
  * @license       https://basercms.net/license/index.html MIT License
  */
 
-namespace BcAddonMigrator\Utility;
+namespace BcAddonMigrator\Controller\Component\ver5;
 
-use Cake\Log\LogTrait;
 use Psr\Log\LogLevel;
+use Cake\Log\LogTrait;
 
 /**
- * Class MigrateComponent5
+ * Class MigrateHelper5
  */
-class MigrateComponent5
+class MigrateHelper5
 {
 	
 	/**
@@ -35,11 +35,11 @@ class MigrateComponent5
 	public function migrate(string $plugin, string $path): void
 	{
 		$code = file_get_contents($path);
-		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Controller' . DS . 'Component', $code);
 		$code = MigrateBasic5::replaceCode($code);
-		$code = preg_replace('/extends Component/', 'extends \Cake\Controller\Component', $code);
+		$code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
+		$code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
 		file_put_contents($path, $code);
-		$this->log('コンポーネント：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('ヘルパ：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
 	
 }	
