@@ -39,7 +39,7 @@ class MigrationController extends BcAdminAppController
 		if (class_exists($migratorClass)) {
 			$this->loadComponent('BcAddonMigrator.' . $this->migrator);
 		} else {
-			$this->BcMessage->setWarning('このプラグインは、このバージョンのbaserCMSに対応していません。');
+			$this->BcMessage->setError('このプラグインは、このバージョンのbaserCMSに対応していません。');
 		}
 	}
 	
