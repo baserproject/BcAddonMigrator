@@ -19,12 +19,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateComponent5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -41,5 +41,5 @@ class MigrateComponent5
 		file_put_contents($path, $code);
 		$this->log('コンポーネント：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
-	
-}	
+
+}

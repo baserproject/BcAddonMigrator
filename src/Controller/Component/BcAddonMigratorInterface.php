@@ -16,31 +16,31 @@ namespace BcAddonMigrator\Controller\Component;
  */
 interface BcAddonMigratorInterface
 {
-	
+
 	/**
 	 * getPluginMessage
 	 * @return mixed
 	 */
 	public function getPluginMessage(): array;
-	
+
 	/**
 	 * getThemeMessage
 	 * @return mixed
 	 */
 	public function getThemeMessage(): array;
-	
-	/**
-	 * migratePlugin
-	 * @param string $plugin
-	 * @return mixed
-	 */
-	public function migratePlugin(string $plugin): void;
-	
-	/**
-	 * migrateTheme
-	 * @param string $theme
-	 * @return mixed
-	 */
-	public function migrateTheme(string $theme): void;
-	
+
+    /**
+     * migratePlugin
+     * @param array $file
+     * @return bool|string
+     */
+	public function migratePlugin(array $file);
+
+    /**
+     * migrateTheme
+     * @param array $file
+     * @return bool|string
+     */
+	public function migrateTheme(array $file);
+
 }

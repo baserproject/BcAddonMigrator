@@ -19,12 +19,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateHelper5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -41,5 +41,5 @@ class MigrateHelper5
 		file_put_contents($path, $code);
 		$this->log('ヘルパ：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
-	
-}	
+
+}

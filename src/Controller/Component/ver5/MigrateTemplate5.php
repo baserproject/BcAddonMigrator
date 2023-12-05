@@ -19,12 +19,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateTemplate5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -40,15 +40,22 @@ class MigrateTemplate5
 		file_put_contents($path, $code);
 		$this->log('テンプレート：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
-	
+
+    /**
+     * 置換処理
+     * @param string $code
+     * @return string
+     */
 	public function replace(string $code)
 	{
 		$code = preg_replace('/\$this->BcForm->/', '$this->BcAdminForm->', $code);
 		$code = preg_replace('/\$this->BcAdminForm->input\(/', '$this->BcAdminForm->control(', $code);
 		$code = preg_replace('/\$post\[\'BlogPost\'\]\[\'(.+?)\'\]/', '\$post->$1', $code);
 		$code = preg_replace('/\$post->posts_date/', '\$post->posted', $code);
+		$code = preg_replace('/\$post->name/', '\$post->title', $code);
+		$code = preg_replace('/<\?php\s+?\$this->BcBaser->docType\(.+?\)\s+?\?>/', '<!DOCTYPE html>', $code);
 		$code = preg_replace('/\$this->BcTime->format\((.+?),\s*(.+?)\)/', '\$this->BcTime->format($2, $1)', $code);
 		return $code;
 	}
-	
-}	
+
+}

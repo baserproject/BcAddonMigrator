@@ -12,6 +12,7 @@
 namespace BcAddonMigrator\Controller\Component\ver5;
 
 use Cake\Filesystem\Folder;
+use Cake\Log\Log;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\ParserFactory;
@@ -24,12 +25,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateController5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -50,7 +51,7 @@ class MigrateController5
 		file_put_contents($path, $code);
 		$this->log('コントローラー：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
-	
+
 	/**
 	 * その他の置き換え
 	 * @param $code
@@ -63,7 +64,7 @@ class MigrateController5
 		$code = preg_replace('/\$this->Session->/', '$this->getRequest()->getSession()->', $code);
 		return $code;
 	}
-	
+
 	/**
 	 * beforeFilterを置き換える
 	 * @param string $code
@@ -74,7 +75,7 @@ class MigrateController5
 		$code = preg_replace('/function beforeFilter\(\)/', 'function beforeFilter(\Cake\Event\EventInterface $event)', $code);
 		return preg_replace('/parent::beforeFilter\(\)/', 'parent::beforeFilter($event)', $code);
 	}
-	
+
 	/**
 	 * setMessageを置き換える
 	 * @param string $code
@@ -86,7 +87,7 @@ class MigrateController5
 		$code = preg_replace('/\$this->setMessage\(([^,]+?)\)/', '$this->BcMessage->setInfo($1)', $code);
 		return $code;
 	}
-	
+
 	/**
 	 * Componentsを置き換える
 	 * @param string $code
@@ -97,7 +98,7 @@ class MigrateController5
 		$code = str_replace('$this->Components->load(', '$this->loadComponent(', $code);
 		return $code;
 	}
-	
+
 	/**
 	 * 管理画面用のメソッドを分離する
 	 * @param string $plugin
@@ -107,17 +108,17 @@ class MigrateController5
 	 */
 	public static function separateAdmin(string $plugin, string $path, string $code): string
 	{
-		$adminPath = BASER_PLUGINS . $plugin . DS . 'src' . DS . 'Controller' . DS . 'Admin' . DS;
+		$adminPath = TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . 'Controller' . DS . 'Admin' . DS;
 		if (!is_dir($adminPath)) {
 			(new Folder())->create($adminPath);
 		}
-		
+
 		$parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
 		try {
 			$namespaces = $parser->parse($code);
 			$adminNamespaces = $parser->parse($code);
 		} catch (\Exception $e) {
-			echo 'Parse Error: ', $e->getMessage();
+			Log::write(LogLevel::ERROR, 'Parse Error: ' . $e->getMessage() . "\n" . $code, 'migrate_addon');
 			return $code;
 		}
 		foreach($adminNamespaces as $i => $namespace) {
@@ -139,12 +140,12 @@ class MigrateController5
 				}
 			}
 		}
-		
+
 		$prettyPrinter = new Standard();
 		$code = $prettyPrinter->prettyPrintFile($namespaces);
 		$adminCode = $prettyPrinter->prettyPrintFile($adminNamespaces);
 		file_put_contents($adminPath . basename($path), $adminCode);
 		return $code;
 	}
-	
+
 }

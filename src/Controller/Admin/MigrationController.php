@@ -13,21 +13,22 @@ namespace BcAddonMigrator\Controller\Admin;
 
 use BaserCore\Controller\Admin\BcAdminAppController;
 use BaserCore\Service\PluginsServiceInterface;
-use Cake\Utility\Hash;
+use BaserCore\Utility\BcZip;
+use Cake\Filesystem\File;
 
 /**
  * MigrationController
  */
 class MigrationController extends BcAdminAppController
 {
-	
+
 	/**
 	 * マイグレーター名
 	 *
 	 * @var null
 	 */
 	public $migrator = null;
-	
+
 	/**
 	 * beforeFilter
 	 */
@@ -42,7 +43,7 @@ class MigrationController extends BcAdminAppController
 			$this->BcMessage->setError('このプラグインは、このバージョンのbaserCMSに対応していません。');
 		}
 	}
-	
+
 	/**
 	 * [ADMIN] インデックスページ
 	 */
@@ -50,75 +51,105 @@ class MigrationController extends BcAdminAppController
 	{
 		$this->setTitle('baserCMS アドオンマイグレーター');
 	}
-	
+
 	/**
 	 * [ADMIN] プラグインのマイグレーション
 	 */
 	public function plugin(PluginsServiceInterface $pluginsService)
 	{
 		if ($this->getRequest()->is('post')) {
-			$this->{$this->migrator}->migratePlugin($this->getRequest()->getData('name'));
-			$this->BcMessage->setInfo('プラグイン： ' . $this->getRequest()->getData('name') . ' のマイグレーションが完了しました。');
-			$this->redirect(['action' => 'plugin']);
-		}
-		
-		$this->setTitle('baserCMS プラグインマイグレーション');
-		$Folder = new \Cake\Filesystem\Folder(BASER_PLUGINS);
-		$files = $Folder->read(true, true);
-		$plugins = [];
-		if (!empty($files[0])) {
-			foreach($files[0] as $file) {
-				if ($file === 'BcAddonMigrator') continue; 
-				$config = include BASER_PLUGINS . $file . DS . 'config.php';
-				if(isset($config['type']) && $config['type'] === 'Plugin') {
-					$plugins[$file] = $file;
-				}
+		    $plugin = $this->{$this->migrator}->migratePlugin($this->getRequest()->getData('name'));
+			if($plugin) {
+			    $this->getRequest()->getSession()->write('BcAddonMigrator.file', $plugin);
+                $this->BcMessage->setInfo('プラグイン： ' . $plugin . ' のマイグレーションが完了しました。');
+			} else {
+                $this->BcMessage->setError('プラグインのマイグレーションが失敗しました。');
 			}
+            $this->redirect(['action' => 'plugin']);
 		}
-		
+
+		if ($this->getRequest()->getSession()->read('BcAddonMigrator.downloaded')) {
+			$this->getRequest()->getSession()->delete('BcAddonMigrator.file');
+			$this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
+			$Folder = new \Cake\Filesystem\Folder(TMP_ADDON_MIGRATOR);
+			$Folder->delete();
+		}
+
+		$this->setTitle('baserCMS プラグインマイグレーション');
 		if(isset($this->{$this->migrator})) {
 			$pluginMessage = $this->{$this->migrator}->getPluginMessage();
 		} else {
 			$pluginMessage = [];
 		}
 		$this->set('pluginMessage', $pluginMessage);
-		$this->set('plugins', $plugins);
+		$file = new File(LOGS . 'migrate_addon.log', true);
+		$this->set('log', $file->read());
 	}
-	
+
 	/**
 	 * [ADMIN] テーマのマイグレーション
 	 */
 	public function theme()
 	{
 		if ($this->getRequest()->is('post')) {
-			$this->{$this->migrator}->migrateTheme($this->getRequest()->getData('name'));
-			$this->BcMessage->setInfo('テーマ： ' . $this->getRequest()->getData('name') . ' のマイグレーションが完了しました。');
+			$theme = $this->{$this->migrator}->migrateTheme($this->getRequest()->getData('name'));
+			if($theme) {
+			    $this->getRequest()->getSession()->write('BcAddonMigrator.file', $theme);
+			    $this->BcMessage->setInfo('テーマ： ' . $this->getRequest()->getData('name') . ' のマイグレーションが完了しました。');
+			} else {
+                $this->BcMessage->setError('テーマのマイグレーションが失敗しました。');
+			}
 			$this->redirect(['action' => 'theme']);
 		}
-		
-		$this->setTitle('baserCMS テーママイグレーション');
-		$Folder = new \Cake\Filesystem\Folder(BASER_PLUGINS);
-		$files = $Folder->read(true, true);
-		$themes = [];
-		if (!empty($files[0])) {
-			foreach($files[0] as $file) {
-				if ($file === 'BcDbMigrator') continue; 
-				$config = include BASER_PLUGINS . $file . DS . 'config.php';
-				if(isset($config['type']) && $config['type'] === 'Theme') {
-					$themes[$file] = $file;
-				}
-			}
+
+		if ($this->getRequest()->getSession()->read('BcAddonMigrator.downloaded')) {
+			$this->getRequest()->getSession()->delete('BcAddonMigrator.file');
+			$this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
+			$Folder = new \Cake\Filesystem\Folder(TMP_ADDON_MIGRATOR);
+			$Folder->delete();
 		}
-		
+
+		$this->setTitle('baserCMS テーママイグレーション');
 		if(isset($this->{$this->migrator})) {
 			$themeMessage = $this->{$this->migrator}->getThemeMessage();
 		} else {
 			$themeMessage = [];
 		}
 		$this->set('themeMessage', $themeMessage);
-		$this->set('themes', $themes);
+		$file = new File(LOGS . 'migrate_addon.log', true);
+		$this->set('log', $file->read());
 	}
-	
+
+	/**
+	 * ダウンロード
+	 */
+	public function download()
+	{
+		$this->autoRender = false;
+		$fileName = $this->getRequest()->getSession()->read('BcAddonMigrator.file');
+		if (!$fileName || !is_dir(TMP_ADDON_MIGRATOR)) {
+			$this->notFound();
+		}
+		// ZIP圧縮
+		$distPath = TMP . $fileName . '.zip';
+
+		$bcZip = new BcZip();
+		$bcZip->create(TMP_ADDON_MIGRATOR, $distPath);
+		header("Cache-Control: no-store");
+		header("Content-Type: application/zip");
+		header("Content-Disposition: attachment; filename=" . basename($distPath) . ";");
+		header("Content-Length: " . filesize($distPath));
+		while(ob_get_level()) {
+			ob_end_clean();
+		}
+		echo readfile($distPath);
+
+		// ダウンロード
+		$Folder = new \Cake\Filesystem\Folder();
+		$Folder->delete(TMP_ADDON_MIGRATOR);
+		$this->getRequest()->getSession()->write('BcAddonMigrator.downloaded', true);
+	}
+
 	/**
 	 * baserCMSのメジャーバージョンを取得
 	 *
@@ -128,5 +159,5 @@ class MigrationController extends BcAdminAppController
 	{
 		return preg_replace('/([0-9])\..+/', "$1", \BaserCore\Utility\BcUtil::getVersion());
 	}
-	
+
 }

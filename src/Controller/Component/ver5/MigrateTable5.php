@@ -19,12 +19,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateTable5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -42,7 +42,7 @@ class MigrateTable5
 		file_put_contents($path, $code);
 		$this->log('テーブル：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
 	}
-	
+
 	/**
 	 * クラス名をファイル名に合わせる
 	 * @param string $path
@@ -55,7 +55,7 @@ class MigrateTable5
 		$code = preg_replace('/class\s+[a-zA-Z0-9]+\s/', "class $className ", $code);
 		return $code;
 	}
-	
+
 	/**
 	 * その他の置き換え
 	 * @param $code
@@ -66,4 +66,4 @@ class MigrateTable5
 		$code = preg_replace('/extends\s+AppModel/', 'extends \BaserCore\Model\Table\AppTable', $code);
 		return $code;
 	}
-}	
+}

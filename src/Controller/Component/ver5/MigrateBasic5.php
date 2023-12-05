@@ -16,7 +16,22 @@ namespace BcAddonMigrator\Controller\Component\ver5;
  */
 class MigrateBasic5
 {
-	
+
+	/**
+     * 一時パス
+     * @var string
+     */
+    public static $tmpPath;
+
+    /**
+     * コンストラクタ
+     * @param string $tmpPath
+     */
+	public function __construct(string $tmpPath)
+    {
+        self::$tmpPath = $tmpPath;
+    }
+
 	public static function replaceCode(string $code): string
 	{
 		$code = preg_replace('/new Folder\(/', 'new \Cake\Filesystem\Folder(', $code);
@@ -44,7 +59,7 @@ class MigrateBasic5
 		$code = preg_replace('/\$this->getRequest\(\)->data\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withParsedBody($1));", $code);
 		return $code;
 	}
-	
+
 	/**
 	 * ネームスペースを追加する
 	 * @param string $plugin
@@ -55,9 +70,9 @@ class MigrateBasic5
 	public static function addNameSpace(string $plugin, string $path, string $layerPath, string $code)
 	{
 		if (preg_match('/namespace/', $code)) return $code;
-		
+
 		$path = dirname($path);
-		$path = str_replace(BASER_PLUGINS . $plugin . DS . 'src' . DS . $layerPath, '', $path);
+		$path = str_replace(TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . $layerPath, '', $path);
 		$nameSpace = $plugin . "\\" . str_replace(DS, "\\", $layerPath);
 		if ($path) {
 			$nameSpace .= "\\" . preg_replace('/^\//', '', $path);
@@ -66,5 +81,5 @@ class MigrateBasic5
 		array_splice($codeArray, 1, 0, 'namespace ' . $nameSpace . ';');
 		return implode("\n", $codeArray);
 	}
-	
+
 }
