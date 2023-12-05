@@ -34,11 +34,16 @@ class MigrateTemplate5
 	 */
 	public function migrate(string $path): void
 	{
-		$code = file_get_contents($path);
+	    if(strpos($path, '/Admin/') !== false) {
+            $isAdmin = true;
+        } else {
+            $isAdmin = false;
+        }
+		$code = file_get_contents($path, $isAdmin);
 		$code = MigrateBasic5::replaceCode($code);
 		$code = $this->replace($code);
 		file_put_contents($path, $code);
-		$this->log('テンプレート：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('テンプレート：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
     /**
@@ -46,9 +51,11 @@ class MigrateTemplate5
      * @param string $code
      * @return string
      */
-	public function replace(string $code)
+	public function replace(string $code, $isAdmin = false)
 	{
-		$code = preg_replace('/\$this->BcForm->/', '$this->BcAdminForm->', $code);
+	    if($isAdmin) {
+            $code = preg_replace('/\$this->BcForm->/', '$this->BcAdminForm->', $code);
+        }
 		$code = preg_replace('/\$this->BcAdminForm->input\(/', '$this->BcAdminForm->control(', $code);
 		$code = preg_replace('/\$post\[\'BlogPost\'\]\[\'(.+?)\'\]/', '\$post->$1', $code);
 		$code = preg_replace('/\$post->posts_date/', '\$post->posted', $code);

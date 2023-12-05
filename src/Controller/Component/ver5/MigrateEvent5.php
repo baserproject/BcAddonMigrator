@@ -15,9 +15,9 @@ use Psr\Log\LogLevel;
 use Cake\Log\LogTrait;
 
 /**
- * Class MigrateHelper5
+ * Class MigrateEvent5
  */
-class MigrateHelper5
+class MigrateEvent5
 {
 
 	/**
@@ -35,11 +35,10 @@ class MigrateHelper5
 	public function migrate(string $plugin, string $path): void
 	{
 		$code = file_get_contents($path);
+		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Event', $code);
 		$code = MigrateBasic5::replaceCode($code);
-		$code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
-		$code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
 		file_put_contents($path, $code);
-		$this->log('ヘルパ：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
+		$this->log('イベント：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
 }

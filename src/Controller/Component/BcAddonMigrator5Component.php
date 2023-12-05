@@ -11,6 +11,7 @@
 
 namespace BcAddonMigrator\Controller\Component;
 
+use BcAddonMigrator\Controller\Component\ver5\MigrateEvent5;
 use Cake\Filesystem\File;
 use Cake\Filesystem\Folder;
 use BcAddonMigrator\Controller\Component\ver5\MigrateBehavior5;
@@ -84,6 +85,7 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 		$this->migrateAddonConfig($plugin, 'Plugin', $pluginPath . 'config.php');
 		$this->migrateConfig($pluginPath . 'config');
 		$this->migrateController($plugin, $srcPath . 'Controller');
+		$this->migrateEvent($plugin, $srcPath . 'Event');
 		$this->migrateComponent($plugin, $srcPath . 'Controller' . DS . 'Component');
 		$this->migrateTable($plugin, $srcPath . 'Model' . DS . 'Table');
 		$this->migrateBehavior($plugin, $srcPath . 'Model' . DS . 'Behavior');
@@ -225,7 +227,11 @@ class Plugin extends BcPlugin {}");
 		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
 
 		// Config
-		if (is_dir($pluginPath . 'Config')) rename($pluginPath . 'Config', $pluginPath . 'config');
+		if (is_dir($pluginPath . 'Config')) {
+		    // 一旦、別名に変更しないと、renameが失敗するため
+            rename($pluginPath . 'Config', $pluginPath . 'configs');
+            rename($pluginPath . 'configs', $pluginPath . 'config');
+        }
 
 		// View
 		if (is_dir($pluginPath . 'View')) rename($pluginPath . 'View', $pluginPath . 'templates');
@@ -376,6 +382,20 @@ class Plugin extends BcPlugin {}");
 		$files = (new Folder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateController5)->migrate($plugin, $file);
+		}
+	}
+
+	/**
+	 * イベントファイルのマイグレーションを実行
+	 *
+	 * @param string $path イベントディレクトリへの実行パス
+	 */
+	public function migrateEvent(string $plugin, string $path)
+	{
+		if (!is_dir($path)) return;
+		$files = (new Folder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateEvent5)->migrate($plugin, $file);
 		}
 	}
 

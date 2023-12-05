@@ -40,7 +40,7 @@ class MigrateTable5
 		$code = self::setClassName($path, $code);
 		$code = self::replaceEtc($code);
 		file_put_contents($path, $code);
-		$this->log('テーブル：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('テーブル：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
 	/**

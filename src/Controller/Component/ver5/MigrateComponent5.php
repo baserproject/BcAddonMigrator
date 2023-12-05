@@ -39,7 +39,7 @@ class MigrateComponent5
 		$code = MigrateBasic5::replaceCode($code);
 		$code = preg_replace('/extends Component/', 'extends \Cake\Controller\Component', $code);
 		file_put_contents($path, $code);
-		$this->log('コンポーネント：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('コンポーネント：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
 }

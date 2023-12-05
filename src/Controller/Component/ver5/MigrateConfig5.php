@@ -19,12 +19,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateConfig5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -38,7 +38,7 @@ class MigrateConfig5
 		$code = MigrateBasic5::replaceCode($code);
 //		$code = preg_replace('//', '', $code);
 		file_put_contents($path, $code);
-		$this->log('コンフィグ：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('コンフィグ：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
-	
-}	
+
+}

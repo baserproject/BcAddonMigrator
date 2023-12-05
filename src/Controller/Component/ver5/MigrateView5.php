@@ -19,12 +19,12 @@ use Cake\Log\LogTrait;
  */
 class MigrateView5
 {
-	
+
 	/**
 	 * Trait
 	 */
 	use LogTrait;
-	
+
 	/**
 	 * マイグレーション
 	 * @param string $plugin
@@ -39,7 +39,7 @@ class MigrateView5
 		$code = MigrateBasic5::replaceCode($code);
 		$code = preg_replace('/\$this->Session->/', '$this->getRequest()->getSession()->', $code);
 		file_put_contents($path, $code);
-		$this->log('ビュー：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('ビュー：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
-	
-}	
+
+}

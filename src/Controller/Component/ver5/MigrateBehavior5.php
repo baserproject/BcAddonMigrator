@@ -39,7 +39,7 @@ class MigrateBehavior5
 		$code = MigrateBasic5::replaceCode($code);
 //		$code = preg_replace('//', '', $code);
 		file_put_contents($path, $code);
-		$this->log('ビヘイビア：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('ビヘイビア：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
 }

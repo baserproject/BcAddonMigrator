@@ -49,7 +49,7 @@ class MigrateController5
 		$code = self::replaceEtc($code);
 		$code = self::separateAdmin($plugin, $path, $code);
 		file_put_contents($path, $code);
-		$this->log('コントローラー：' . $path . ' をマイグレーションしました。', LogLevel::INFO);
+		$this->log('コントローラー：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
 	/**
