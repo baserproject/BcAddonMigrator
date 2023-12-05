@@ -1,0 +1,7 @@
+{
+    "name": "baserproject/bc-addon-migrator",
+    "description": "BcAddonMigrator plugin for baserCMS",
+    "homepage": "https://basercms.net",
+    "type": "cakephp-plugin",
+    "license": "MIT"
+}
