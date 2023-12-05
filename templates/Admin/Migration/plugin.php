@@ -17,12 +17,8 @@
  */
 ?>
 
-
+<p>利用方法については、<a href="https://baserproject.github.io/5/plugin/migration_plugin_from_ver4" target="_blank">baserCMS４のプラグインを変換</a>をご覧ください。
 <?php echo $this->BcAdminForm->create(null, ['type' => 'file']) ?>
-
-<section class="bca-section">
-  <h2 class="bca-main__heading" data-bca-heading-size="lg">プラグインマイグレーション実行</h2>
-</section>
 
 <section class="bca-section">
 	<table class="bca-form-table" id="ListTable">

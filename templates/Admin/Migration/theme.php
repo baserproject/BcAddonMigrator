@@ -20,9 +20,7 @@
 
 <?php echo $this->BcAdminForm->create() ?>
 
-<section class="bca-section">
-  <h2 class="bca-main__heading" data-bca-heading-size="lg">テーママイグレーション実行</h2>
-</section>
+<p>利用方法については、<a href="https://baserproject.github.io/5/theme/migration_theme_from_ver4" target="_blank">baserCMS４のテーマを変換</a>をご覧ください。
 
 <section class="bca-section">
 	<table class="bca-form-table" id="ListTable">
