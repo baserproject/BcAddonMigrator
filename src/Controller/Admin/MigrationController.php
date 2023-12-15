@@ -95,7 +95,7 @@ class MigrationController extends BcAdminAppController
 			$theme = $this->{$this->migrator}->migrateTheme($this->getRequest()->getData('name'));
 			if($theme) {
 			    $this->getRequest()->getSession()->write('BcAddonMigrator.file', $theme);
-			    $this->BcMessage->setInfo('テーマ： ' . $this->getRequest()->getData('name') . ' のマイグレーションが完了しました。');
+			    $this->BcMessage->setInfo('テーマ： ' . $theme . ' のマイグレーションが完了しました。');
 			} else {
                 $this->BcMessage->setError('テーマのマイグレーションが失敗しました。');
 			}
@@ -134,7 +134,7 @@ class MigrationController extends BcAdminAppController
 		$distPath = TMP . $fileName . '.zip';
 
 		$bcZip = new BcZip();
-		$bcZip->create(TMP_ADDON_MIGRATOR, $distPath);
+		$bcZip->create(TMP_ADDON_MIGRATOR . $fileName, $distPath);
 		header("Cache-Control: no-store");
 		header("Content-Type: application/zip");
 		header("Content-Disposition: attachment; filename=" . basename($distPath) . ";");

@@ -18,7 +18,7 @@
 ?>
 
 
-<?php echo $this->BcAdminForm->create() ?>
+<?php echo $this->BcAdminForm->create(null, ['type' => 'file']) ?>
 
 <p>利用方法については、<a href="https://baserproject.github.io/5/theme/migration_theme_from_ver4" target="_blank">baserCMS４のテーマを変換</a>をご覧ください。
 
