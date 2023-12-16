@@ -190,7 +190,8 @@ return [
 	{
 		$newName = \Cake\Utility\Inflector::camelize($plugin);
 		if ($plugin !== $newName) {
-			rename(TMP_ADDON_MIGRATOR . $plugin, TMP_ADDON_MIGRATOR . $newName);
+		    rename(TMP_ADDON_MIGRATOR . $plugin, TMP_ADDON_MIGRATOR . 'tmp_plugin');
+			rename(TMP_ADDON_MIGRATOR . 'tmp_plugin', TMP_ADDON_MIGRATOR . $newName);
 		}
 		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
 		if (!is_dir($pluginPath . 'src')) (new \Cake\Filesystem\Folder())->create($pluginPath . 'src');
