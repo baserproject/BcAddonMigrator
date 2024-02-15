@@ -55,6 +55,7 @@ class MigrateBasic5
 		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\'](?!(\s*=|\[\'))/', "\$this->getRequest()->getData('$1')", $code);
 		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\']\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withData('$1', $2));", $code);
 		// 0階層
+		$code = preg_replace('/\$this->getRequest\(\)->params(?!(\s*=|\[\'))/', "\$this->getRequest()->getAttribute('params')", $code);
 		$code = preg_replace('/\$this->getRequest\(\)->data(?!(\s*=|\[\'))/', "\$this->getRequest()->getData()", $code);
 		$code = preg_replace('/\$this->getRequest\(\)->data\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withParsedBody($1));", $code);
 		return $code;
