@@ -48,7 +48,7 @@ class MigrateBasic5
 		$code = preg_replace('/getTableLocator\(\)->get\(\'Blog.BlogTag\'\)/', "getTableLocator()->get('CuBlog.BlogTags')", $code);
 		$code = preg_replace('/\sgetVersion\(\)/', '\BaserCore\Utility\BcUtil::getVersion()', $code);
 		$code = preg_replace('/\$this->request/', '$this->getRequest()', $code);
-		$code = preg_replace('/\$this->getRequest\(\)->params/', "$this->getRequest()->getAttribute('params')", $code);
+		$code = preg_replace('/\$this->getRequest\(\)->params/', "\$this->getRequest()->getAttribute('params')", $code);
 		// 2階層
 		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\']\[\'([^\]]+?)\'\](?!(\s*=))/', "\$this->getRequest()->getData('$1.$2')", $code);
 		$code = preg_replace('/\$this->getRequest\(\)->data\[\'([^\]]+?)\']\[\'([^\]]+?)\'\]\s*=\s(.+?);/', "\$this->setRequest(\$this->getRequest()->withData('$1.$2', $3));", $code);
