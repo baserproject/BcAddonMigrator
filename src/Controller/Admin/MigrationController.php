@@ -83,7 +83,7 @@ class MigrationController extends BcAdminAppController
             $pluginMessage = [];
         }
         $this->set('pluginMessage', $pluginMessage);
-        $file = new File(LOGS . 'migrate_addon.log', true);
+        $file = new \BaserCore\Utility\BcFile(LOGS . 'migrate_addon.log', true);
         $this->set('log', $file->read());
     }
 
@@ -107,7 +107,7 @@ class MigrationController extends BcAdminAppController
         if ($this->getRequest()->getSession()->read('BcAddonMigrator.downloaded')) {
             $this->getRequest()->getSession()->delete('BcAddonMigrator.file');
             $this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
-            $Folder = new \Cake\Filesystem\Folder(TMP_ADDON_MIGRATOR);
+            $Folder = new \BaserCore\Utility\BcFolder(TMP_ADDON_MIGRATOR);
             $Folder->delete();
         }
 
@@ -118,7 +118,7 @@ class MigrationController extends BcAdminAppController
             $themeMessage = [];
         }
         $this->set('themeMessage', $themeMessage);
-        $file = new File(LOGS . 'migrate_addon.log', true);
+        $file = new \BaserCore\Utility\BcFile(LOGS . 'migrate_addon.log', true);
         $this->set('log', $file->read());
     }
 

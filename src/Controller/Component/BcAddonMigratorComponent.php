@@ -13,6 +13,7 @@ namespace BcAddonMigrator\Controller\Component;
 
 use Cake\Controller\Component;
 use Cake\Utility\Inflector;
+use Laminas\Diactoros\UploadedFile;
 use Psr\Log\LogLevel;
 
 /**
@@ -26,10 +27,10 @@ class BcAddonMigratorComponent extends Component
      * @param array $data
      * @return bool
      */
-    protected function setup(array $data)
+    protected function setup(UploadedFile $data)
     {
 		if(LOGS . 'migrate_addon.log') unlink(LOGS . 'migrate_addon.log');
-		if (empty($data['tmp_name'])) {
+		if ($data->getError() !== UPLOAD_ERR_OK) {
 			return false;
 		}
 		// アップロードファイルを一時フォルダに解凍
@@ -42,15 +43,17 @@ class BcAddonMigratorComponent extends Component
 	 * @param array $data リクエストデータ
 	 * @return bool|string
 	 */
-	protected function _unzipUploadFileToTmp($data)
+	protected function _unzipUploadFileToTmp(UploadedFile $data)
 	{
 		$Folder = new \Cake\Filesystem\Folder();
 		$Folder->delete(TMP_ADDON_MIGRATOR);
 		$Folder->create(TMP_ADDON_MIGRATOR, 0777);
 		$targetPath = TMP_ADDON_MIGRATOR . $data['name'];
-		if (!move_uploaded_file($data['tmp_name'], $targetPath)) {
-			return false;
-		}
+		try {
+		    $data->moveTo($targetPath);
+        } catch(\Throwable) {
+            return false;
+        }
 		// ZIPファイルを解凍する
 		$BcZip = new \BaserCore\Utility\BcZip();
 		if (!$BcZip->extract($targetPath, TMP_ADDON_MIGRATOR)) {

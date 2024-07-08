@@ -248,7 +248,7 @@ class Plugin extends BcPlugin {}");
 		if(is_dir($modelPath)) {
 			$files = (new \Cake\Filesystem\Folder($modelPath))->read();
 			if($files[1] && !is_dir($tablePath)) {
-				(new Folder())->create($tablePath);
+				(new \BaserCore\Utility\BcFolder())->create($tablePath);
 			}
 			foreach($files[1] as $file) {
 				$className = \Cake\Utility\Inflector::pluralize(basename($file, '.php')) . 'Table.php';
@@ -380,7 +380,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateController(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateController5)->migrate($plugin, $file);
 		}
@@ -394,7 +394,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateEvent(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateEvent5)->migrate($plugin, $file);
 		}
@@ -422,7 +422,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateComponent(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateComponent5())->migrate($plugin, $file);
 		}
@@ -436,7 +436,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateTable(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateTable5())->migrate($plugin, $file);
 		}
@@ -450,7 +450,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateBehavior(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateBehavior5())->migrate($plugin, $file);
 		}
@@ -466,7 +466,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateConfig($path)
 	{
 		if (!is_dir($path)) return;
-		$Folder = new Folder($path);
+		$Folder = new \BaserCore\Utility\BcFolder($path);
 		$files = $Folder->read(true, true, true);
 		foreach($files[0] as $dir) {
 			$this->migrateTemplate($dir);
@@ -485,7 +485,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateView(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateView5())->migrate($plugin, $file);
 		}
@@ -499,7 +499,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateHelper(string $plugin, string $path)
 	{
 		if (!is_dir($path)) return;
-		$files = (new Folder($path))->read(true, true, true);
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateHelper5())->migrate($plugin, $file);
 		}
@@ -513,7 +513,7 @@ class Plugin extends BcPlugin {}");
 	public function migrateTemplate(string $path)
 	{
 		if (!is_dir($path)) return;
-		$Folder = new Folder($path);
+		$Folder = new \BaserCore\Utility\BcFolder($path);
 		$files = $Folder->read(true, true, true);
 		foreach($files[0] as $dir) {
 			$this->migrateTemplate($dir);
