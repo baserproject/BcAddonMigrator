@@ -48,7 +48,7 @@ class BcAddonMigratorComponent extends Component
 		$Folder = new \Cake\Filesystem\Folder();
 		$Folder->delete(TMP_ADDON_MIGRATOR);
 		$Folder->create(TMP_ADDON_MIGRATOR, 0777);
-		$targetPath = TMP_ADDON_MIGRATOR . $data['name'];
+		$targetPath = TMP_ADDON_MIGRATOR . $data->getClientFilename();
 		try {
 		    $data->moveTo($targetPath);
         } catch(\Throwable) {
