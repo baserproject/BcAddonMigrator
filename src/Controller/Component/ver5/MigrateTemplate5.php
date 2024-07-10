@@ -32,7 +32,7 @@ class MigrateTemplate5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $path): void
+	public function migrate(string $path, bool $is5): void
 	{
 	    if(strpos($path, '/Admin/') !== false) {
             $isAdmin = true;
@@ -40,8 +40,10 @@ class MigrateTemplate5
             $isAdmin = false;
         }
 		$code = file_get_contents($path, $isAdmin);
-		$code = MigrateBasic5::replaceCode($code);
-		$code = $this->replace($code);
+		$code = MigrateBasic5::replaceCode($code, $is5);
+		if(!$is5) {
+            $code = $this->replace($code);
+        }
 		file_put_contents($path, $code);
 		$this->log('テンプレート：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}

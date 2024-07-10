@@ -32,11 +32,20 @@ class MigrateEvent5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $plugin, string $path): void
+	public function migrate(string $plugin, string $path, bool $is5): void
 	{
 		$code = file_get_contents($path);
-		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Event', $code);
-		$code = MigrateBasic5::replaceCode($code);
+		if(!$is5) {
+            $code = MigrateBasic5::addNameSpace($plugin, $path, 'Event', $code);
+            $code = preg_replace('/extends BcViewEventListener/', 'extends \BaserCore\Event\BcViewEventListener', $code);
+            $code = preg_replace('/extends BcControllerEventListener/', 'extends \BaserCore\Event\BcControllerEventListener', $code);
+            $code = preg_replace('/extends BcHelperEventListener/', 'extends \BaserCore\Event\BcHelperEventListener', $code);
+            $code = preg_replace('/extends BcModelEventListener/', 'extends \BaserCore\Event\BcModelEventListener', $code);
+            $code = preg_replace('/CakeEvent /', '\Cake\Event\Event ', $code);
+            $code = preg_replace('/->subject\(\)/', '->getSubject()', $code);
+            $code = preg_replace('/->helpers\[] = (.+?);/', "->viewBuilder()->addHelpers([$1]);", $code);
+        }
+        $code = MigrateBasic5::replaceCode($code, $is5);
 		file_put_contents($path, $code);
 		$this->log('イベント：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}

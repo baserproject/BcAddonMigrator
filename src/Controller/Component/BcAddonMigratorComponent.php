@@ -29,7 +29,7 @@ class BcAddonMigratorComponent extends Component
      */
     protected function setup(UploadedFile $data)
     {
-		if(LOGS . 'migrate_addon.log') unlink(LOGS . 'migrate_addon.log');
+		if(file_exists(LOGS . 'migrate_addon.log')) unlink(LOGS . 'migrate_addon.log');
 		if ($data->getError() !== UPLOAD_ERR_OK) {
 			return false;
 		}
@@ -45,7 +45,7 @@ class BcAddonMigratorComponent extends Component
 	 */
 	protected function _unzipUploadFileToTmp(UploadedFile $data)
 	{
-		$Folder = new \Cake\Filesystem\Folder();
+		$Folder = new \BaserCore\Utility\BcFolder();
 		$Folder->delete(TMP_ADDON_MIGRATOR);
 		$Folder->create(TMP_ADDON_MIGRATOR, 0777);
 		$targetPath = TMP_ADDON_MIGRATOR . $data->getClientFilename();
@@ -59,7 +59,7 @@ class BcAddonMigratorComponent extends Component
 		if (!$BcZip->extract($targetPath, TMP_ADDON_MIGRATOR)) {
 			return false;
 		}
-		$Folder = new \Cake\Filesystem\Folder(TMP_ADDON_MIGRATOR);
+		$Folder = new \BaserCore\Utility\BcFolder(TMP_ADDON_MIGRATOR);
 		$files = $Folder->read();
 		if (empty($files[0])) {
 			$this->log('バックアップファイルに問題があります。バージョンが違う可能性があります。', LogLevel::ERROR, 'migrate_addon');

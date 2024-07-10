@@ -38,16 +38,20 @@ class MigrateController5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $plugin, string $path): void
+	public function migrate(string $plugin, string $path, bool $is5): void
 	{
 		$code = file_get_contents($path);
-		$code = MigrateBasic5::addNameSpace($plugin, $path, 'Controller', $code);
-		$code = MigrateBasic5::replaceCode($code);
-		$code = self::replaceBeforeFilter($code);
-		$code = self::replaceMessage($code);
-		$code = self::replaceComponents($code);
-		$code = self::replaceEtc($code);
-		$code = self::separateAdmin($plugin, $path, $code);
+		if(!$is5) {
+            $code = MigrateBasic5::addNameSpace($plugin, $path, 'Controller', $code);
+            $code = MigrateBasic5::replaceCode($code, $is5);
+            $code = self::replaceBeforeFilter($code);
+            $code = self::replaceMessage($code);
+            $code = self::replaceComponents($code);
+        }
+		$code = self::replaceEtc($code, $is5);
+		if(!$is5) {
+            $code = self::separateAdmin($plugin, $path, $code);
+        }
 		file_put_contents($path, $code);
 		$this->log('コントローラー：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
@@ -57,11 +61,15 @@ class MigrateController5
 	 * @param $code
 	 * @return array|string|string[]|null
 	 */
-	public static function replaceEtc($code)
+	public static function replaceEtc($code, bool $is5)
 	{
-		$code = preg_replace('/extends\s+AppController/', 'extends \BaserCore\Controller\BcFrontAppController', $code);
-		$code = preg_replace('/\$this->pageTitle = (.+?);/', '$this->setTitle($1);', $code);
-		$code = preg_replace('/\$this->Session->/', '$this->getRequest()->getSession()->', $code);
+	    if($is5) {
+            $code = preg_replace('/\$this->modelClass/', '$this->defaultTable', $code);
+        } else {
+            $code = preg_replace('/extends\s+AppController/', 'extends \BaserCore\Controller\BcFrontAppController', $code);
+            $code = preg_replace('/\$this->pageTitle = (.+?);/', '$this->setTitle($1);', $code);
+            $code = preg_replace('/\$this->Session->/', '$this->getRequest()->getSession()->', $code);
+        }
 		return $code;
 	}
 

@@ -32,12 +32,18 @@ class MigrateBasic5
         self::$tmpPath = $tmpPath;
     }
 
-	public static function replaceCode(string $code): string
+	public static function replaceCode(string $code, bool $is5): string
 	{
-		$code = preg_replace('/new Folder\(/', 'new \Cake\Filesystem\Folder(', $code);
-		$code = preg_replace('/new File\(/', 'new \Cake\Filesystem\File(', $code);
+		$code = preg_replace('/new Folder\(/', 'new \BaserCore\Utility\BcFolder(', $code);
+		$code = preg_replace('/new File\(/', 'new \BaserCore\Utility\BcFile(', $code);
+		$code = preg_replace('/new \\\Cake\\\Filesystem\\\Folder\(/', 'new \BaserCore\Utility\BcFolder(', $code);
+		$code = preg_replace('/new \\\Cake\\\Filesystem\\\File\(/', 'new \BaserCore\Utility\BcFile(', $code);
+		if($is5) return $code;
+
+		$code = preg_replace('/([^\\\])BcUtil::/', "$1\BaserCore\Utility\BcUtil::", $code);
 		$code = preg_replace('/new BcZip\(/', 'new \BaserCore\Utility\BcZip(', $code);
 		$code = preg_replace('/App::uses\(.+?;\n/', '', $code);
+		$code = preg_replace('/Hash::/', '\Cake\Utility\Hash::', $code);
 		$code = preg_replace('/Configure::/', '\Cake\Core\Configure::', $code);
 		$code = preg_replace('/Inflector::/', '\Cake\Utility\Inflector::', $code);
 		$code = preg_replace('/ClassRegistry::init\(/', '\Cake\ORM\TableRegistry::getTableLocator()->get(', $code);

@@ -32,12 +32,16 @@ class MigrateHelper5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $plugin, string $path): void
+	public function migrate(string $plugin, string $path, bool $is5): void
 	{
-		$code = file_get_contents($path);
-		$code = MigrateBasic5::replaceCode($code);
-		$code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
-		$code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
+	    $code = file_get_contents($path);
+	    if(!$is5) {
+            $code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
+            $code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
+            $code = preg_replace('/__construct\(View/', '__construct(\Cake\View\View', $code);
+        }
+        $code = MigrateBasic5::replaceCode($code, $is5);
+        $code = preg_replace('/public.+?\$helpers =/', 'protected array $helpers =', $code);
 		file_put_contents($path, $code);
 		$this->log('ヘルパ：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}

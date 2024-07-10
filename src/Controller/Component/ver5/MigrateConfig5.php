@@ -32,11 +32,10 @@ class MigrateConfig5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $path): void
+	public function migrate(string $path, bool $is5): void
 	{
 		$code = file_get_contents($path);
-		$code = MigrateBasic5::replaceCode($code);
-//		$code = preg_replace('//', '', $code);
+		$code = MigrateBasic5::replaceCode($code, $is5);
 		file_put_contents($path, $code);
 		$this->log('コンフィグ：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}

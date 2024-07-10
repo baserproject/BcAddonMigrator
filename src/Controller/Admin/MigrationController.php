@@ -72,7 +72,7 @@ class MigrationController extends BcAdminAppController
         if ($this->getRequest()->getSession()->read('BcAddonMigrator.downloaded')) {
             $this->getRequest()->getSession()->delete('BcAddonMigrator.file');
             $this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
-            $Folder = new \Cake\Filesystem\Folder(TMP_ADDON_MIGRATOR);
+            $Folder = new \BaserCore\Utility\BcFolder(TMP_ADDON_MIGRATOR);
             $Folder->delete();
         }
 
@@ -147,7 +147,7 @@ class MigrationController extends BcAdminAppController
         echo readfile($distPath);
 
         // ダウンロード
-        $Folder = new \Cake\Filesystem\Folder();
+        $Folder = new \BaserCore\Utility\BcFolder();
         $Folder->delete(TMP_ADDON_MIGRATOR);
         $this->getRequest()->getSession()->write('BcAddonMigrator.downloaded', true);
     }

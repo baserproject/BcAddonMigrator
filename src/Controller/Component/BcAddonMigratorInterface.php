@@ -11,6 +11,8 @@
 
 namespace BcAddonMigrator\Controller\Component;
 
+use Laminas\Diactoros\UploadedFile;
+
 /**
  * BcAddonMigratorInterface
  */
@@ -34,13 +36,13 @@ interface BcAddonMigratorInterface
      * @param array $file
      * @return bool|string
      */
-	public function migratePlugin(array $file);
+	public function migratePlugin(UploadedFile $file);
 
     /**
      * migrateTheme
      * @param array $file
      * @return bool|string
      */
-	public function migrateTheme(array $file);
+	public function migrateTheme(UploadedFile $file);
 
 }

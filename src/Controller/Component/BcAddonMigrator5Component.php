@@ -11,9 +11,8 @@
 
 namespace BcAddonMigrator\Controller\Component;
 
+use BaserCore\Utility\BcFile;
 use BcAddonMigrator\Controller\Component\ver5\MigrateEvent5;
-use Cake\Filesystem\File;
-use Cake\Filesystem\Folder;
 use BcAddonMigrator\Controller\Component\ver5\MigrateBehavior5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateComponent5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateConfig5;
@@ -22,6 +21,7 @@ use BcAddonMigrator\Controller\Component\ver5\MigrateHelper5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateTable5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateTemplate5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateView5;
+use Laminas\Diactoros\UploadedFile;
 
 /**
  * BcAddonMigrator4Component
@@ -70,30 +70,38 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 	 * @param array $postData
      * @return bool|string
 	 */
-	public function migratePlugin(array $file)
+	public function migratePlugin(UploadedFile $file)
 	{
 	    $plugin = parent::setup($file);
 	    if(!$plugin) return false;
+	    $is5 = $is51 = false;
+        if(file_exists(TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . 'Plugin.php')) {
+            $is5 = true;
+        } elseif(file_exists(TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . $plugin . 'Plugin.php')) {
+            $is51 = true;
+        }
+        if($is51) return $plugin;
 
-		$plugin = $this->migrateBasicDir($plugin);
-		$this->makePluginClass($plugin);
-		$this->migratePluginStructure($plugin);
+        $plugin = $this->migrateBasicDir($plugin, $is5);
+        $this->makePluginClass($plugin, $is5);
+        $this->migratePluginStructure($plugin, $is5);
 
-		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
-		$srcPath = $pluginPath . 'src' . DS;
+        $pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
+        $srcPath = $pluginPath . 'src' . DS;
 
-		$this->migrateAddonConfig($plugin, 'Plugin', $pluginPath . 'config.php');
-		$this->migrateConfig($pluginPath . 'config');
-		$this->migrateController($plugin, $srcPath . 'Controller');
-		$this->migrateEvent($plugin, $srcPath . 'Event');
-		$this->migrateComponent($plugin, $srcPath . 'Controller' . DS . 'Component');
-		$this->migrateTable($plugin, $srcPath . 'Model' . DS . 'Table');
-		$this->migrateBehavior($plugin, $srcPath . 'Model' . DS . 'Behavior');
-		$this->migrateHelper($plugin, $srcPath . 'View' . DS . 'Helper');
-		$this->migrateView($plugin, $srcPath . 'View');
+        $this->migrateAddonConfig($plugin, 'Plugin', $pluginPath . 'config.php', $is5);
+        $this->migrateConfig($pluginPath . 'config', $is5);
+        $this->migrateController($plugin, $srcPath . 'Controller', $is5);
+        $this->migrateEvent($plugin, $srcPath . 'Event', $is5);
+        $this->migrateComponent($plugin, $srcPath . 'Controller' . DS . 'Component', $is5);
+        $this->migrateTable($plugin, $srcPath . 'Model' . DS . 'Table', $is5);
+        $this->migrateBehavior($plugin, $srcPath . 'Model' . DS . 'Behavior', $is5);
+        $this->migrateHelper($plugin, $srcPath . 'View' . DS . 'Helper', $is5);
+        $this->migrateView($plugin, $srcPath . 'View', $is5);
 
-		$templatePath = TMP_ADDON_MIGRATOR . $plugin . DS . 'templates' . DS;
-		$this->migrateTemplate($templatePath);
+        $templatePath = TMP_ADDON_MIGRATOR . $plugin . DS . 'templates' . DS;
+        $this->migrateTemplate($templatePath, $is5);
+
 		return $plugin;
 	}
 
@@ -104,10 +112,11 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrateAddonConfig(string $plugin, string $type, string $path)
+	public function migrateAddonConfig(string $plugin, string $type, string $path, $is5)
 	{
+	    if($is5) return;
 		if (!file_exists($path)) {
-			$file = new File($path);
+			$file = new \BaserCore\Utility\BcFile($path);
 			$file->write("<?php
 return [
 	'type' => '{$type}',
@@ -139,7 +148,7 @@ return [
 			} else {
 				$adminLink = '[]';
 			}
-			$file = new File($path);
+			$file = new \BaserCore\Utility\BcFile($path);
 			$file->write("<?php
 return [
 	'type' => '{$type}',
@@ -151,7 +160,6 @@ return [
 	'installMessage' => '{$installMessage}',
 ];");
 		}
-		$file->close();
 	}
 
 	/**
@@ -160,24 +168,30 @@ return [
 	 * @param string $theme テーマ名
      * @return bool|string
 	 */
-	public function migrateTheme(array $file)
+	public function migrateTheme(UploadedFile $file)
 	{
 	    $theme = parent::setup($file);
 	    if(!$theme) return false;
+        if(file_exists(TMP_ADDON_MIGRATOR . $theme . DS . 'src' . DS . 'Plugin.php')) {
+            $is5 = true;
+        } elseif(file_exists(TMP_ADDON_MIGRATOR . $theme . DS . 'src' . DS . $theme . 'Plugin.php')) {
+            $is51 = true;
+        }
+        if($is51) return $theme;
 
-		$theme = $this->migrateBasicDir($theme);
-		$this->makePluginClass($theme);
-		$this->migrateThemeStructure($theme);
+		$theme = $this->migrateBasicDir($theme, $is5);
+		$this->makePluginClass($theme, $is5);
+		$this->migrateThemeStructure($theme, $is5);
 
 		$themePath = TMP_ADDON_MIGRATOR . $theme . DS;
 		$srcPath = $themePath . 'src' . DS;
 
-		$this->migrateAddonConfig($theme, 'Theme', $themePath . 'config.php');
-		$this->migrateConfig($themePath . 'config');
-		$this->migrateHelper($theme, $srcPath . 'View' . DS . 'Helper');
+		$this->migrateAddonConfig($theme, 'Theme', $themePath . 'config.php', $is5);
+		$this->migrateConfig($themePath . 'config', $is5);
+		$this->migrateHelper($theme, $srcPath . 'View' . DS . 'Helper', $is5);
 
 		$templatePath = TMP_ADDON_MIGRATOR . $theme . DS . 'templates' . DS;
-		$this->migrateTemplate($templatePath);
+		$this->migrateTemplate($templatePath, $is5);
 		return $theme;
 	}
 
@@ -186,15 +200,17 @@ return [
 	 * @param string $plugin
 	 * @return string
 	 */
-	public function migrateBasicDir(string $plugin): string
+	public function migrateBasicDir(string $plugin, bool $is5): string
 	{
 		$newName = \Cake\Utility\Inflector::camelize($plugin);
+		if($is5) return $newName;
+
 		if ($plugin !== $newName) {
 		    rename(TMP_ADDON_MIGRATOR . $plugin, TMP_ADDON_MIGRATOR . 'tmp_plugin');
 			rename(TMP_ADDON_MIGRATOR . 'tmp_plugin', TMP_ADDON_MIGRATOR . $newName);
 		}
 		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
-		if (!is_dir($pluginPath . 'src')) (new \Cake\Filesystem\Folder())->create($pluginPath . 'src');
+		if (!is_dir($pluginPath . 'src')) (new \BaserCore\Utility\BcFolder())->create($pluginPath . 'src');
 		if (is_dir($pluginPath . 'Test')) rename($pluginPath . 'Test', $pluginPath . 'tests');
 		if (is_dir($pluginPath . 'tests' . DS . 'Case')) rename($pluginPath . 'tests' . DS . 'Case', $pluginPath . 'tests' . DS . 'TestCase');
 		return $newName;
@@ -205,16 +221,24 @@ return [
 	 * @param string $plugin
 	 * @return void
 	 */
-	public function makePluginClass(string $plugin)
+	public function makePluginClass(string $plugin, bool $is5)
 	{
 		$srcPath = TMP_ADDON_MIGRATOR . $plugin . DS . 'src';
-		if (file_exists($srcPath . DS . 'Plugin.php')) return;
-		(new \Cake\Filesystem\Folder())->create($srcPath);
-		$file = new \Cake\Filesystem\File($srcPath . DS . 'Plugin.php');
+		if ($is5) {
+		    $newPath = $srcPath . DS . $plugin . 'Plugin.php';
+		    rename($srcPath . DS . 'Plugin.php', $newPath);
+		    $file = new BcFile($newPath);
+		    $content = $file->read();
+		    $content = str_replace('class Plugin', 'class ' . $plugin . 'Plugin', $content);
+		    $file->write($content);
+            return;
+        }
+		(new \BaserCore\Utility\BcFolder())->create($srcPath);
+		$file = new \BaserCore\Utility\BcFile($srcPath . DS . $plugin . 'Plugin.php');
 		$file->write("<?php
 namespace {$plugin};
 use BaserCore\BcPlugin;
-class Plugin extends BcPlugin {}");
+class {$plugin}Plugin extends BcPlugin {}");
 	}
 
 	/**
@@ -223,8 +247,9 @@ class Plugin extends BcPlugin {}");
 	 * @param string $plugin プラグイン名
 	 * @param string $php phpの実行ファイルのパス
 	 */
-	public function migratePluginStructure(string $plugin)
+	public function migratePluginStructure(string $plugin, bool $is5)
 	{
+	    if($is5) return;
 		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
 
 		// Config
@@ -237,6 +262,12 @@ class Plugin extends BcPlugin {}");
 		// View
 		if (is_dir($pluginPath . 'View')) rename($pluginPath . 'View', $pluginPath . 'templates');
 
+		// Helper
+		if (is_dir($pluginPath . 'templates' . DS . 'Helper')) {
+		    (new \BaserCore\Utility\BcFolder())->create($pluginPath . 'src' . DS . 'View');
+			rename($pluginPath . 'templates' . DS . 'Helper', $pluginPath . 'src' . DS . 'View' . DS . 'Helper');
+		}
+
 		// Controller / Model / Event / Lib / Vendor
 		foreach(['Controller', 'Model', 'Event', 'Lib', 'Vendor'] as $dir) {
 			if (is_dir($pluginPath . $dir)) rename($pluginPath . $dir, $pluginPath . 'src' . DS . $dir);
@@ -246,7 +277,7 @@ class Plugin extends BcPlugin {}");
 		$modelPath = TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . 'Model' . DS;
 		$tablePath = TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . 'Model' . DS . 'Table' . DS;
 		if(is_dir($modelPath)) {
-			$files = (new \Cake\Filesystem\Folder($modelPath))->read();
+			$files = (new \BaserCore\Utility\BcFolder($modelPath))->read();
 			if($files[1] && !is_dir($tablePath)) {
 				(new \BaserCore\Utility\BcFolder())->create($tablePath);
 			}
@@ -258,7 +289,7 @@ class Plugin extends BcPlugin {}");
 
 		// move admin
 		if (is_dir($pluginPath . 'templates')) {
-			$files = (new \Cake\Filesystem\Folder($pluginPath . 'templates'))->read();
+			$files = (new \BaserCore\Utility\BcFolder($pluginPath . 'templates'))->read();
 			foreach($files[0] as $dir) {
 				switch($dir) {
 					case 'Elements':
@@ -287,8 +318,9 @@ class Plugin extends BcPlugin {}");
 	 * @param string $plugin プラグイン名
 	 * @param string $php phpの実行ファイルのパス
 	 */
-	public function migrateThemeStructure(string $plugin)
+	public function migrateThemeStructure(string $plugin, bool $is5)
 	{
+	    if($is5) return;
 		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
 
 		// Config
@@ -297,21 +329,21 @@ class Plugin extends BcPlugin {}");
 		// Helper
 		if (is_dir($pluginPath . 'Helper')) {
 			if(!is_dir($pluginPath . 'src' . DS . 'View')) {
-				(new \Cake\Filesystem\Folder())->create($pluginPath . 'src' . DS . 'View');
+				(new \BaserCore\Utility\BcFolder())->create($pluginPath . 'src' . DS . 'View');
 			}
 			rename($pluginPath . 'Helper', $pluginPath . 'src' . DS . 'View' . DS . 'Helper');
 		}
 
 		if(!is_dir($pluginPath . 'webroot')) {
-			(new \Cake\Filesystem\Folder())->create($pluginPath . 'webroot');
+			(new \BaserCore\Utility\BcFolder())->create($pluginPath . 'webroot');
 		}
 
 		if(!is_dir($pluginPath . 'templates')) {
-			(new \Cake\Filesystem\Folder())->create($pluginPath . 'templates');
+			(new \BaserCore\Utility\BcFolder())->create($pluginPath . 'templates');
 		}
 
 		// templates
-		$files = (new \Cake\Filesystem\Folder($pluginPath))->read();
+		$files = (new \BaserCore\Utility\BcFolder($pluginPath))->read();
 		foreach($files[0] as $dir) {
 			switch($dir) {
 				case 'css':
@@ -354,21 +386,21 @@ class Plugin extends BcPlugin {}");
 	{
 		$templatesPath = TMP_ADDON_MIGRATOR . $plugin . DS . 'templates' . DS;
 		if (!is_dir($templatesPath . 'Admin')) {
-			(new \Cake\Filesystem\Folder())->create($templatesPath . 'Admin');
+			(new \BaserCore\Utility\BcFolder())->create($templatesPath . 'Admin');
 		}
-		$files = (new \Cake\Filesystem\Folder($templatesPath . $name))->read();
+		$files = (new \BaserCore\Utility\BcFolder($templatesPath . $name))->read();
 		foreach($files[0] as $dir) {
 			if ($dir !== 'admin') continue;
 			$adminPath = $templatesPath . $name . DS . $dir . DS;
-			$files = (new \Cake\Filesystem\Folder($adminPath))->read();
+			$files = (new \BaserCore\Utility\BcFolder($adminPath))->read();
 			$files = $files[0] + $files[1];
 			foreach($files as $file) {
 				if (!is_dir($templatesPath . 'Admin' . DS . $name)) {
-					(new \Cake\Filesystem\Folder())->create($templatesPath . 'Admin' . DS . $name);
+					(new \BaserCore\Utility\BcFolder())->create($templatesPath . 'Admin' . DS . $name);
 				}
 				rename($adminPath . $file, $templatesPath . 'Admin' . DS . $name . DS . $file);
 			}
-			(new \Cake\Filesystem\Folder($adminPath))->delete($adminPath);
+			(new \BaserCore\Utility\BcFolder($adminPath))->delete($adminPath);
 		}
 	}
 
@@ -377,12 +409,12 @@ class Plugin extends BcPlugin {}");
 	 *
 	 * @param string $path コントローラーディレクトリへの実行パス
 	 */
-	public function migrateController(string $plugin, string $path)
+	public function migrateController(string $plugin, string $path, bool $is5)
 	{
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateController5)->migrate($plugin, $file);
+			(new MigrateController5)->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -391,12 +423,13 @@ class Plugin extends BcPlugin {}");
 	 *
 	 * @param string $path イベントディレクトリへの実行パス
 	 */
-	public function migrateEvent(string $plugin, string $path)
+	public function migrateEvent(string $plugin, string $path, bool $is5)
 	{
+	    if($is5) return;
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateEvent5)->migrate($plugin, $file);
+			(new MigrateEvent5)->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -419,12 +452,13 @@ class Plugin extends BcPlugin {}");
 	 *
 	 * @param string $path コンポーネントディレクトリのパス
 	 */
-	public function migrateComponent(string $plugin, string $path)
+	public function migrateComponent(string $plugin, string $path, bool $is5)
 	{
+	    if($is5) return;
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateComponent5())->migrate($plugin, $file);
+			(new MigrateComponent5())->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -433,12 +467,13 @@ class Plugin extends BcPlugin {}");
 	 *
 	 * @param string $path テーブルディレクトリのパス
 	 */
-	public function migrateTable(string $plugin, string $path)
+	public function migrateTable(string $plugin, string $path, bool $is5)
 	{
+	    if($is5) return;
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateTable5())->migrate($plugin, $file);
+			(new MigrateTable5())->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -447,12 +482,13 @@ class Plugin extends BcPlugin {}");
 	 *
 	 * @param string $path ビヘイビアディレクトリのパス
 	 */
-	public function migrateBehavior(string $plugin, string $path)
+	public function migrateBehavior(string $plugin, string $path, bool $is5)
 	{
+	    if($is5) return;
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateBehavior5())->migrate($plugin, $file);
+			(new MigrateBehavior5())->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -463,16 +499,17 @@ class Plugin extends BcPlugin {}");
 	 * @param string $plugin 古いプラグイン名
 	 * @param string $newPlugin 新しいプラグイン名
 	 */
-	public function migrateConfig($path)
+	public function migrateConfig($path, bool $is5)
 	{
+	    if($is5) return;
 		if (!is_dir($path)) return;
 		$Folder = new \BaserCore\Utility\BcFolder($path);
 		$files = $Folder->read(true, true, true);
 		foreach($files[0] as $dir) {
-			$this->migrateTemplate($dir);
+			$this->migrateTemplate($dir, $is5);
 		}
 		foreach($files[1] as $file) {
-			(new MigrateConfig5())->migrate($file);
+			(new MigrateConfig5())->migrate($file, $is5);
 		}
 	}
 
@@ -482,12 +519,12 @@ class Plugin extends BcPlugin {}");
 	 * @param string $path ビューディレクトリのパス
 	 * @param string $plugin 古いプラグイン名
 	 */
-	public function migrateView(string $plugin, string $path)
+	public function migrateView(string $plugin, string $path, $is5)
 	{
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateView5())->migrate($plugin, $file);
+			(new MigrateView5())->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -496,12 +533,12 @@ class Plugin extends BcPlugin {}");
 	 *
 	 * @param string $path ヘルパーディレクトリのパス
 	 */
-	public function migrateHelper(string $plugin, string $path)
+	public function migrateHelper(string $plugin, string $path, bool $is5)
 	{
 		if (!is_dir($path)) return;
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
-			(new MigrateHelper5())->migrate($plugin, $file);
+			(new MigrateHelper5())->migrate($plugin, $file, $is5);
 		}
 	}
 
@@ -510,16 +547,16 @@ class Plugin extends BcPlugin {}");
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrateTemplate(string $path)
+	public function migrateTemplate(string $path, bool $is5)
 	{
 		if (!is_dir($path)) return;
 		$Folder = new \BaserCore\Utility\BcFolder($path);
 		$files = $Folder->read(true, true, true);
 		foreach($files[0] as $dir) {
-			$this->migrateTemplate($dir);
+			$this->migrateTemplate($dir, $is5);
 		}
 		foreach($files[1] as $file) {
-			(new MigrateTemplate5())->migrate($file);
+			(new MigrateTemplate5())->migrate($file, $is5);
 		}
 	}
 
