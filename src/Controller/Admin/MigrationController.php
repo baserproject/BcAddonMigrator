@@ -58,13 +58,17 @@ class MigrationController extends BcAdminAppController
     public function plugin(PluginsServiceInterface $pluginsService)
     {
         if ($this->getRequest()->is('post')) {
-            $plugin = $this->{$this->migrator}->migratePlugin($this->getRequest()->getData('name'));
-            if ($plugin) {
-                $this->getRequest()->getSession()->write('BcAddonMigrator.file', $plugin);
-                $this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
-                $this->BcMessage->setInfo('プラグイン： ' . $plugin . ' のマイグレーションが完了しました。');
+            if($this->getRequest()->getData('name')->getError() !== UPLOAD_ERR_OK) {
+                $this->BcMessage->setError('プラグインファイルを選択してください。');
             } else {
-                $this->BcMessage->setError('プラグインのマイグレーションが失敗しました。');
+                $plugin = $this->{$this->migrator}->migratePlugin($this->getRequest()->getData('name'));
+                if ($plugin) {
+                    $this->getRequest()->getSession()->write('BcAddonMigrator.file', $plugin);
+                    $this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
+                    $this->BcMessage->setInfo('プラグイン： ' . $plugin . ' のマイグレーションが完了しました。');
+                } else {
+                    $this->BcMessage->setError('プラグインのマイグレーションが失敗しました。');
+                }
             }
             $this->redirect(['action' => 'plugin']);
         }
@@ -93,13 +97,17 @@ class MigrationController extends BcAdminAppController
     public function theme()
     {
         if ($this->getRequest()->is('post')) {
-            $theme = $this->{$this->migrator}->migrateTheme($this->getRequest()->getData('name'));
-            if ($theme) {
-                $this->getRequest()->getSession()->write('BcAddonMigrator.file', $theme);
-                $this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
-                $this->BcMessage->setInfo('テーマ： ' . $theme . ' のマイグレーションが完了しました。');
+            if($this->getRequest()->getData('name')->getError() !== UPLOAD_ERR_OK) {
+                $this->BcMessage->setError('テーマファイルを選択してください。');
             } else {
-                $this->BcMessage->setError('テーマのマイグレーションが失敗しました。');
+                $theme = $this->{$this->migrator}->migrateTheme($this->getRequest()->getData('name'));
+                if ($theme) {
+                    $this->getRequest()->getSession()->write('BcAddonMigrator.file', $theme);
+                    $this->getRequest()->getSession()->delete('BcAddonMigrator.downloaded');
+                    $this->BcMessage->setInfo('テーマ： ' . $theme . ' のマイグレーションが完了しました。');
+                } else {
+                    $this->BcMessage->setError('テーマのマイグレーションが失敗しました。');
+                }
             }
             $this->redirect(['action' => 'theme']);
         }
