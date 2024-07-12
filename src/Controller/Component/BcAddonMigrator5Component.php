@@ -172,6 +172,7 @@ return [
 	{
 	    $theme = parent::setup($file);
 	    if(!$theme) return false;
+		$is5 = $is51 = false;
         if(file_exists(TMP_ADDON_MIGRATOR . $theme . DS . 'src' . DS . 'Plugin.php')) {
             $is5 = true;
         } elseif(file_exists(TMP_ADDON_MIGRATOR . $theme . DS . 'src' . DS . $theme . 'Plugin.php')) {
