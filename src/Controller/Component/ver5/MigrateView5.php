@@ -34,6 +34,9 @@ class MigrateView5
 	 */
 	public function migrate(string $plugin, string $path, bool $is5): void
 	{
+	    if(in_array(basename($path), \Cake\Core\Configure::read('BcAddonMigrator.ignoreFiles'))) {
+            return;
+        }
 		$code = file_get_contents($path);
 		if(!$is5) {
             $code = MigrateBasic5::addNameSpace($plugin, $path, 'View', $code);

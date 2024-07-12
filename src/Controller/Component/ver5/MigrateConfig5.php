@@ -34,6 +34,9 @@ class MigrateConfig5
 	 */
 	public function migrate(string $path, bool $is5): void
 	{
+	    if(in_array(basename($path), \Cake\Core\Configure::read('BcAddonMigrator.ignoreFiles'))) {
+            return;
+        }
 		$code = file_get_contents($path);
 		$code = MigrateBasic5::replaceCode($code, $is5);
 		file_put_contents($path, $code);

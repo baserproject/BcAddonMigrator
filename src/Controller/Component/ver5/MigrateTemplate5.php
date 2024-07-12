@@ -34,6 +34,9 @@ class MigrateTemplate5
 	 */
 	public function migrate(string $path, bool $is5): void
 	{
+	    if(in_array(basename($path), \Cake\Core\Configure::read('BcAddonMigrator.ignoreFiles'))) {
+            return;
+        }
 	    if(strpos($path, '/Admin/') !== false) {
             $isAdmin = true;
         } else {

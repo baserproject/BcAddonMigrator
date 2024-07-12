@@ -42,7 +42,7 @@ class MigrateBasic5
 
 		$code = preg_replace('/([^\\\])BcUtil::/', "$1\BaserCore\Utility\BcUtil::", $code);
 		$code = preg_replace('/new BcZip\(/', 'new \BaserCore\Utility\BcZip(', $code);
-		$code = preg_replace('/App::uses\(.+?;\n/', '', $code);
+		$code = preg_replace('/App::uses\(.+?;\n/', "\n", $code);
 		$code = preg_replace('/Hash::/', '\Cake\Utility\Hash::', $code);
 		$code = preg_replace('/Configure::/', '\Cake\Core\Configure::', $code);
 		$code = preg_replace('/Inflector::/', '\Cake\Utility\Inflector::', $code);
