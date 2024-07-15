@@ -15,6 +15,6 @@ namespace BcAddonMigrator;
 use BaserCore\BcPlugin;
 
 /**
- * plugin for BcPluginSample
+ * plugin for BcAddonMigrator
  */
-class Plugin extends BcPlugin {}
+class BcAddonMigratorPlugin extends BcPlugin {}
