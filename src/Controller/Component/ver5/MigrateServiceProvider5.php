@@ -15,9 +15,9 @@ use Psr\Log\LogLevel;
 use Cake\Log\LogTrait;
 
 /**
- * Class MigrateHelper5
+ * Class MigrateView5
  */
-class MigrateHelper5
+class MigrateServiceProvider5
 {
 
 	/**
@@ -32,21 +32,17 @@ class MigrateHelper5
 	 * @param string $path
 	 * @return void
 	 */
-	public function migrate(string $plugin, string $path, bool $is5): void
+	public function migrate(string $path, bool $is5): void
 	{
 	    if(in_array(basename($path), \Cake\Core\Configure::read('BcAddonMigrator.ignoreFiles'))) {
             return;
         }
-	    $code = file_get_contents($path);
-	    if(!$is5) {
-            $code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
-            $code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
-            $code = preg_replace('/__construct\(View/', '__construct(\Cake\View\View', $code);
-        }
-        $code = MigrateBasic5::replaceCode($code, $is5);
-        $code = preg_replace('/public[^(\r\n)]+?\$helpers =/', 'protected array $helpers =', $code);
+		$code = file_get_contents($path);
+		if(!$is5) return;
+        $code = preg_replace('/protected[^(\r\n)]+?\$provides =/', 'protected array $provides =', $code);
+        $code = preg_replace('/public[^(\r\n)]+?\$provides =/', 'protected array $provides =', $code);
 		file_put_contents($path, $code);
-		$this->log('ヘルパ：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
+		$this->log('サービス：' . $path . ' をマイグレーションしました。', LogLevel::INFO, 'migrate_addon');
 	}
 
 }

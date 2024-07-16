@@ -18,6 +18,7 @@ use BcAddonMigrator\Controller\Component\ver5\MigrateComponent5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateConfig5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateController5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateHelper5;
+use BcAddonMigrator\Controller\Component\ver5\MigrateServiceProvider5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateTable5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateTemplate5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateView5;
@@ -98,6 +99,7 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
         $this->migrateBehavior($plugin, $srcPath . 'Model' . DS . 'Behavior', $is5);
         $this->migrateHelper($plugin, $srcPath . 'View' . DS . 'Helper', $is5);
         $this->migrateView($plugin, $srcPath . 'View', $is5);
+        $this->migrateServiceProvider($srcPath . 'ServiceProvider', $is5);
 
         $templatePath = TMP_ADDON_MIGRATOR . $plugin . DS . 'templates' . DS;
         $this->migrateTemplate($templatePath, $is5);
@@ -540,6 +542,20 @@ class {$plugin}Plugin extends BcPlugin {}");
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateHelper5())->migrate($plugin, $file, $is5);
+		}
+	}
+
+	/**
+	 * ヘルパーファイルのマイグレーションを実行
+	 *
+	 * @param string $path ヘルパーディレクトリのパス
+	 */
+	public function migrateServiceProvider(string $path, bool $is5)
+	{
+		if (!is_dir($path)) return;
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateServiceProvider5())->migrate($file, $is5);
 		}
 	}
 
