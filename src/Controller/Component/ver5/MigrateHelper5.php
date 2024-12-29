@@ -43,7 +43,7 @@ class MigrateHelper5
             $code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
             $code = preg_replace('/__construct\(View/', '__construct(\Cake\View\View', $code);
             $code = preg_replace('/\$this->request/', '$this->getView()->getRequest()', $code);
-            $code = preg_replace('/getRequest\(\)->here/', "getRequest()->getAttribute('here')", $code);
+            $code = preg_replace('/getRequest\(\)->here/', "getRequest()->getPath()", $code);
             $code = preg_replace('/getRequest\(\)->params/', "getRequest()->getAttribute('params')", $code);
         }
         $code = MigrateBasic5::replaceCode($code, $is5);
