@@ -309,6 +309,10 @@ class {$plugin}Plugin extends BcPlugin {}");
 						rename($pluginPath . 'templates' . DS . $dir, $pluginPath . 'templates' . DS . 'email');
 						$this->moveAdminTemplates($plugin, 'email');
 						break;
+					case 'Errors':
+						rename($pluginPath . 'templates' . DS . $dir, $pluginPath . 'templates' . DS . 'error');
+						$this->moveAdminTemplates($plugin, 'error');
+						break;
 					default:
 						$this->moveAdminTemplates($plugin, $dir);
 						break;
@@ -367,6 +371,10 @@ class {$plugin}Plugin extends BcPlugin {}");
 				case 'Emails':
 					rename($pluginPath . $dir, $pluginPath . 'templates' . DS . 'email');
 					$this->moveAdminTemplates($plugin, 'email');
+					break;
+				case 'Errors':
+					rename($pluginPath . $dir, $pluginPath . 'templates' . DS . 'error');
+					$this->moveAdminTemplates($plugin, 'error');
 					break;
 				case 'templates':
 				case 'webroot':
