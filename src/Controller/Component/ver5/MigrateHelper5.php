@@ -42,6 +42,9 @@ class MigrateHelper5
             $code = MigrateBasic5::addNameSpace($plugin, $path, 'View' . DS . 'Helper', $code);
             $code = preg_replace('/extends AppHelper/', 'extends \Cake\View\Helper', $code);
             $code = preg_replace('/__construct\(View/', '__construct(\Cake\View\View', $code);
+            $code = preg_replace('/\$this->request/', '$this->getView()->getRequest()', $code);
+            $code = preg_replace('/getRequest\(\)->here/', "getRequest()->getPath()", $code);
+            $code = preg_replace('/getRequest\(\)->params/', "getRequest()->getAttribute('params')", $code);
         }
         $code = MigrateBasic5::replaceCode($code, $is5);
         $code = preg_replace('/public[^(\r\n)]+?\$helpers =/', 'protected array $helpers =', $code);

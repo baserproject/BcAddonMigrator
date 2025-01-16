@@ -12,6 +12,7 @@
 namespace BcAddonMigrator\Controller\Component;
 
 use BaserCore\Utility\BcFile;
+use BcAddonMigrator\Controller\Component\ver5\MigrateEntity5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateEvent5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateBehavior5;
 use BcAddonMigrator\Controller\Component\ver5\MigrateComponent5;
@@ -96,6 +97,7 @@ class BcAddonMigrator5Component extends BcAddonMigratorComponent implements BcAd
         $this->migrateEvent($plugin, $srcPath . 'Event', $is5);
         $this->migrateComponent($plugin, $srcPath . 'Controller' . DS . 'Component', $is5);
         $this->migrateTable($plugin, $srcPath . 'Model' . DS . 'Table', $is5);
+        $this->migrateEntity($plugin, $srcPath . 'Model' . DS . 'Entity', $is5);
         $this->migrateBehavior($plugin, $srcPath . 'Model' . DS . 'Behavior', $is5);
         $this->migrateHelper($plugin, $srcPath . 'View' . DS . 'Helper', $is5);
         $this->migrateView($plugin, $srcPath . 'View', $is5);
@@ -485,6 +487,20 @@ class {$plugin}Plugin extends BcPlugin {}");
 		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
 		foreach($files[1] as $file) {
 			(new MigrateTable5())->migrate($plugin, $file, $is5);
+		}
+	}
+
+	/**
+	 * テーブルファイルのマイグレーションを実行
+	 *
+	 * @param string $path テーブルディレクトリのパス
+	 */
+	public function migrateEntity(string $plugin, string $path, bool $is5)
+	{
+		if (!is_dir($path)) return;
+		$files = (new \BaserCore\Utility\BcFolder($path))->read(true, true, true);
+		foreach($files[1] as $file) {
+			(new MigrateEntity5())->migrate($plugin, $file, $is5);
 		}
 	}
 
