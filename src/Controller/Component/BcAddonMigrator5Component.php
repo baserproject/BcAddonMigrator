@@ -215,7 +215,7 @@ return [
 			rename(TMP_ADDON_MIGRATOR . 'tmp_plugin', TMP_ADDON_MIGRATOR . $newName);
 		}
 		$pluginPath = TMP_ADDON_MIGRATOR . $plugin . DS;
-		if (!is_dir($pluginPath . 'src')) (new \BaserCore\Utility\BcFolder())->create($pluginPath . 'src');
+		if (!is_dir($pluginPath . 'src')) (new \BaserCore\Utility\BcFolder($pluginPath . 'src'))->create();
 		if (is_dir($pluginPath . 'Test')) rename($pluginPath . 'Test', $pluginPath . 'tests');
 		if (is_dir($pluginPath . 'tests' . DS . 'Case')) rename($pluginPath . 'tests' . DS . 'Case', $pluginPath . 'tests' . DS . 'TestCase');
 		return $newName;
@@ -238,7 +238,7 @@ return [
 		    $file->write($content);
             return;
         }
-		(new \BaserCore\Utility\BcFolder())->create($srcPath);
+		(new \BaserCore\Utility\BcFolder($srcPath))->create();
 		$file = new \BaserCore\Utility\BcFile($srcPath . DS . $plugin . 'Plugin.php');
 		$file->write("<?php
 namespace {$plugin};
@@ -269,7 +269,7 @@ class {$plugin}Plugin extends BcPlugin {}");
 
 		// Helper
 		if (is_dir($pluginPath . 'templates' . DS . 'Helper')) {
-		    (new \BaserCore\Utility\BcFolder())->create($pluginPath . 'src' . DS . 'View');
+		    (new \BaserCore\Utility\BcFolder($pluginPath . 'src' . DS . 'View'))->create();
 			rename($pluginPath . 'templates' . DS . 'Helper', $pluginPath . 'src' . DS . 'View' . DS . 'Helper');
 		}
 
@@ -284,7 +284,7 @@ class {$plugin}Plugin extends BcPlugin {}");
 		if(is_dir($modelPath)) {
 			$files = (new \BaserCore\Utility\BcFolder($modelPath))->read();
 			if($files[1] && !is_dir($tablePath)) {
-				(new \BaserCore\Utility\BcFolder())->create($tablePath);
+				(new \BaserCore\Utility\BcFolder($tablePath))->create();
 			}
 			foreach($files[1] as $file) {
 				$className = \Cake\Utility\Inflector::pluralize(basename($file, '.php')) . 'Table.php';
@@ -338,17 +338,17 @@ class {$plugin}Plugin extends BcPlugin {}");
 		// Helper
 		if (is_dir($pluginPath . 'Helper')) {
 			if(!is_dir($pluginPath . 'src' . DS . 'View')) {
-				(new \BaserCore\Utility\BcFolder())->create($pluginPath . 'src' . DS . 'View');
+				(new \BaserCore\Utility\BcFolder($pluginPath . 'src' . DS . 'View'))->create();
 			}
 			rename($pluginPath . 'Helper', $pluginPath . 'src' . DS . 'View' . DS . 'Helper');
 		}
 
 		if(!is_dir($pluginPath . 'webroot')) {
-			(new \BaserCore\Utility\BcFolder())->create($pluginPath . 'webroot');
+			(new \BaserCore\Utility\BcFolder($pluginPath . 'webroot'))->create();
 		}
 
 		if(!is_dir($pluginPath . 'templates')) {
-			(new \BaserCore\Utility\BcFolder())->create($pluginPath . 'templates');
+			(new \BaserCore\Utility\BcFolder($pluginPath . 'templates'))->create();
 		}
 
 		// templates
@@ -399,7 +399,7 @@ class {$plugin}Plugin extends BcPlugin {}");
 	{
 		$templatesPath = TMP_ADDON_MIGRATOR . $plugin . DS . 'templates' . DS;
 		if (!is_dir($templatesPath . 'Admin')) {
-			(new \BaserCore\Utility\BcFolder())->create($templatesPath . 'Admin');
+			(new \BaserCore\Utility\BcFolder($templatesPath . 'Admin'))->create();
 		}
 		$files = (new \BaserCore\Utility\BcFolder($templatesPath . $name))->read();
 		foreach($files[0] as $dir) {
@@ -409,11 +409,11 @@ class {$plugin}Plugin extends BcPlugin {}");
 			$files = $files[0] + $files[1];
 			foreach($files as $file) {
 				if (!is_dir($templatesPath . 'Admin' . DS . $name)) {
-					(new \BaserCore\Utility\BcFolder())->create($templatesPath . 'Admin' . DS . $name);
+					(new \BaserCore\Utility\BcFolder($templatesPath . 'Admin' . DS . $name))->create();
 				}
 				rename($adminPath . $file, $templatesPath . 'Admin' . DS . $name . DS . $file);
 			}
-			(new \BaserCore\Utility\BcFolder($adminPath))->delete($adminPath);
+			(new \BaserCore\Utility\BcFolder($adminPath))->delete();
 		}
 	}
 

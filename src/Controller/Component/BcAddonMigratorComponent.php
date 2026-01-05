@@ -45,9 +45,8 @@ class BcAddonMigratorComponent extends Component
 	 */
 	protected function _unzipUploadFileToTmp(UploadedFile $data)
 	{
-		$Folder = new \BaserCore\Utility\BcFolder();
-		$Folder->delete(TMP_ADDON_MIGRATOR);
-		$Folder->create(TMP_ADDON_MIGRATOR, 0777);
+		(new \BaserCore\Utility\BcFolder(TMP_ADDON_MIGRATOR))->delete();
+		(new \BaserCore\Utility\BcFolder(TMP_ADDON_MIGRATOR))->create(0777);
 		$targetPath = TMP_ADDON_MIGRATOR . $data->getClientFilename();
 		try {
 		    $data->moveTo($targetPath);

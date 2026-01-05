@@ -121,7 +121,7 @@ class MigrateController5
 	{
 		$adminPath = TMP_ADDON_MIGRATOR . $plugin . DS . 'src' . DS . 'Controller' . DS . 'Admin' . DS;
 		if (!is_dir($adminPath)) {
-			(new \BaserCore\Utility\BcFolder())->create($adminPath);
+			(new \BaserCore\Utility\BcFolder($adminPath))->create();
 		}
 
 		$parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);

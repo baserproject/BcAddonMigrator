@@ -155,8 +155,8 @@ class MigrationController extends BcAdminAppController
         echo readfile($distPath);
 
         // ダウンロード
-        $Folder = new \BaserCore\Utility\BcFolder();
-        $Folder->delete(TMP_ADDON_MIGRATOR);
+        $Folder = new \BaserCore\Utility\BcFolder(TMP_ADDON_MIGRATOR);
+        $Folder->delete();
         $this->getRequest()->getSession()->write('BcAddonMigrator.downloaded', true);
     }
 

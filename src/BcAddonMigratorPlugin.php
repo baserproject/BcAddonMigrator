@@ -17,4 +17,18 @@ use BaserCore\BcPlugin;
 /**
  * plugin for BcAddonMigrator
  */
-class BcAddonMigratorPlugin extends BcPlugin {}
+class BcAddonMigratorPlugin extends BcPlugin
+{
+    /**
+     * console
+     *
+     * @param \Cake\Console\CommandCollection $commands
+     * @return \Cake\Console\CommandCollection
+     */
+    public function console(\Cake\Console\CommandCollection $commands): \Cake\Console\CommandCollection
+    {
+        $commands->add('bc_addon_migrator', \BcAddonMigrator\Command\BcAddonMigratorCommand::class);
+        return parent::console($commands);
+    }
+}
+
