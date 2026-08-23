@@ -130,14 +130,20 @@ return [
 	'url' => '',
 ];");
 		} else {
-			$config = include $path;
-			if(is_array($config)) return;
-			if(!isset($title)) $title = $plugin;
-			if(!isset($description)) $description = '';
-			if(!isset($author)) $author = '';
-			if(!isset($url)) $url = '';
-			if(!isset($adminLink)) $adminLink = [];
-			if(!isset($installMessage)) $installMessage = '';
+			// セキュリティ対策（JVN#21754394 / GHSA-jq83-g24q-wph5）:
+			// アップロードされた config.php を include すると、ファイル内の任意の PHP コードが
+			// 変換処理中に実行されてしまう。そのため include は行わず、AddonConfigParser で
+			// 静的解析（token_get_all）して設定値のみを取り出す。
+			$parsed = \BcAddonMigrator\Utility\AddonConfigParser::parse((string)file_get_contents($path));
+			// `return [...]` 形式（従来の is_array 判定に相当）はそのまま利用できるため変換不要
+			if($parsed['isReturnArray']) return;
+			$vars = $parsed['vars'];
+			$title = $vars['title'] ?? $plugin;
+			$description = $vars['description'] ?? '';
+			$author = $vars['author'] ?? '';
+			$url = $vars['url'] ?? '';
+			$adminLink = $vars['adminLink'] ?? [];
+			$installMessage = $vars['installMessage'] ?? '';
 			if($adminLink) {
 				if(!empty($adminLink['plugin'])) {
 					$adminLink['plugin'] = \Cake\Utility\Inflector::camelize($adminLink['plugin']);
