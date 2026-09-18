@@ -40,11 +40,14 @@ class MigrateBasic5
 		$code = preg_replace('/new \\\Cake\\\Filesystem\\\File\(/', 'new \BaserCore\Utility\BcFile(', $code);
 		if($is5) return $code;
 
-		// $this->pageTitle は4系のプロパティ。5系では BcBaserHelper の setTitle()/getTitle() を使う。
+		// $this->pageTitle は4系のプロパティ。5系では BcBaserHelper の
+		// setTitle() / getContentsTitle() を使う。
 		// コントローラだけでなくテンプレートやレイアウトでも使われているため共通処理で変換する
 		// （変換漏れがあると「BaserCore.pageTitleHelper could not be found」で500になる）
+		// 参照側は getTitle() ではなく getContentsTitle()。getTitle() はパンくずと
+		// サイトタイトルを連結するため、素のタイトルである $this->pageTitle とは別物になる。
 		$code = preg_replace('/\\$this->pageTitle\\s*=\\s*(.+?);/', '$this->BcBaser->setTitle($1);', $code);
-		$code = preg_replace('/\\$this->pageTitle\\b(?!\\s*=)/', '$this->BcBaser->getTitle()', $code);
+		$code = preg_replace('/\\$this->pageTitle\\b(?!\\s*=)/', '$this->BcBaser->getContentsTitle()', $code);
 
 		// fullUrl() は4系のグローバル関数。5系では BcBaserHelper::getUrl($url, true) を使う
 		$code = self::replaceFullUrl($code);
