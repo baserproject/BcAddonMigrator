@@ -124,7 +124,9 @@ class MigrateController5
 			(new \BaserCore\Utility\BcFolder($adminPath))->create();
 		}
 
-		$parser = (new ParserFactory)->create(ParserFactory::PREFER_PHP7);
+		// nikic/php-parser 5.x で ParserFactory::create() / PREFER_PHP7 は廃止された
+		// （baser-core 5.4 は ~5.8.0 を要求）ため、稼働中の PHP 向けパーサを生成する
+		$parser = (new ParserFactory)->createForHostVersion();
 		try {
 			$namespaces = $parser->parse($code);
 			$adminNamespaces = $parser->parse($code);
@@ -140,7 +142,9 @@ class MigrateController5
 				foreach($class->stmts as $k => $method) {
 					if ($method instanceof ClassMethod) {
 						if (preg_match('/^admin_/', $method->name)) {
-							$method->name = preg_replace('/^admin_/', '', $method->name);
+							// php-parser 5.x では ClassMethod::$name は Identifier 型のため、
+							// 文字列を直接代入できない（4.x では代入できていた）
+							$method->name = new \PhpParser\Node\Identifier(preg_replace('/^admin_/', '', (string)$method->name));
 							unset($namespaces[$i]->stmts[$j]->stmts[$k]);
 						} else {
 							unset($class->stmts[$k]);
